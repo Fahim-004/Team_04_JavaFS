@@ -223,6 +223,7 @@ Review checks include:
 Once the Pull Request is approved, it can be merged into `main`.
 
 After merging, the feature branch can be deleted.
+
 **Note: DO NOT MERGE INTO MAIN BRANCH UNTIL YOUR TEAM LEAD GIVES YOU PERMISSION**
 
 ---
