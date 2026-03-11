@@ -9,7 +9,7 @@ The purpose of this workflow is to:
 * Ensure everyone's code stays **synchronized**
 * Prevent accidental overwriting of work
 
-This project will use a **two-branch workflow**.
+This project uses a **two-branch workflow**.
 
 ---
 
@@ -38,11 +38,29 @@ Important rule:
 
 ```
 Never push code directly to main
+All development must happen on the dev branch
 ```
 
 ---
 
-# 2. Repository Structure
+# 2. Development Branch (dev)
+
+The `dev` branch has already been created on GitHub by the **team lead**.
+
+Developers **do not need to create this branch themselves**.
+
+The repository structure is therefore:
+
+```text
+main → Stable branch
+dev  → Development branch used by the entire team
+```
+
+All development must happen on the **dev branch**.
+
+---
+
+# 3. Repository Structure
 
 The repository contains the following directories:
 
@@ -51,7 +69,7 @@ PAT_System
 │
 ├── backend_pat       → Spring Boot Backend
 ├── pat-frontend      → React Frontend
-├── instructions      → Documentation
+├── instructions      → Project documentation
 └── .gitignore
 ```
 
@@ -59,7 +77,7 @@ Both backend and frontend teams work inside the **same repository**.
 
 ---
 
-# 3. One-Time Setup (For New Developers)
+# 4. One-Time Setup (For New Developers)
 
 If you are cloning the project for the first time, follow these steps.
 
@@ -75,7 +93,9 @@ Example:
 git clone https://github.com/your-team/PAT_System.git
 ```
 
-Enter the project directory:
+---
+
+### Step 2 — Enter the project directory
 
 ```bash
 cd PAT_System
@@ -83,17 +103,25 @@ cd PAT_System
 
 ---
 
-### Step 2 — Switch to the dev branch
+### Step 3 — Switch to the dev branch
 
-All development happens in `dev`.
+All development happens on the `dev` branch.
 
 ```bash
 git checkout dev
 ```
 
+If Git shows an error saying the branch does not exist locally, run:
+
+```
+git checkout -b dev
+```
+
+This creates a **local copy of the dev branch** that tracks the remote branch.
+
 ---
 
-### Step 3 — Pull the latest code
+### Step 4 — Pull the latest code
 
 ```bash
 git pull origin dev
@@ -103,7 +131,7 @@ This ensures your system has the **latest version of the project**.
 
 ---
 
-# 4. If You Have Already Cloned the Repository
+# 5. If You Have Already Cloned the Repository
 
 Some team members may have cloned the project earlier.
 
@@ -123,11 +151,13 @@ git fetch
 git checkout dev
 ```
 
-If Git says the branch does not exist locally:
+If Git shows an error saying the branch does not exist locally, run:
 
 ```bash
-git checkout -b dev origin/dev
+git checkout -b dev
 ```
+
+This creates a **local copy of the dev branch** that tracks the remote branch.
 
 ---
 
@@ -141,7 +171,7 @@ Now your local project matches the development branch.
 
 ---
 
-# 5. Daily Development Workflow
+# 6. Daily Development Workflow
 
 Every developer must follow this process when working.
 
@@ -249,7 +279,7 @@ Now the rest of the team can pull your updates.
 
 ---
 
-# 6. Important Team Rules
+# 7. Important Team Rules
 
 To avoid conflicts and broken builds, follow these rules.
 
@@ -283,15 +313,17 @@ Avoid modifying someone else's files without informing them.
 
 Test your code before pushing.
 
-Never push broken code.
+Never push code that breaks the project.
 
 ---
 
-# 7. When Do We Use the Main Branch?
+# 8. When Do We Use the Main Branch?
 
 The `main` branch represents a **stable version of the project**.
 
 We update `main` only when a major feature is complete.
+
+**NOTE : The merging of *****dev***** branch into *****main***** branch done only by the Team Lead**
 
 Example milestone:
 
@@ -309,11 +341,11 @@ git merge dev
 git push origin main
 ```
 
-This creates a stable checkpoint of the project.
+This creates a **stable checkpoint** of the project.
 
 ---
 
-# 8. Summary
+# 9. Summary
 
 The workflow is simple.
 
