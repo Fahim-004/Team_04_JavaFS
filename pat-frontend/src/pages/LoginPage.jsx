@@ -1,3 +1,4 @@
+
 import InputField from "../components/InputField";
 import Button from "../components/Button";
 
@@ -10,7 +11,7 @@ function LoginPage() {
 
       <div className="login-box">
 
-        <h2>Login</h2>
+        <h2 >Login</h2>
 
         <InputField
   type="email"
