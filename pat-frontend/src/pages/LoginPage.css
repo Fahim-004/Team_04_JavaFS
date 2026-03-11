@@ -1,0 +1,36 @@
+body{
+  margin:0;
+}
+
+.page{
+  height:100vh;
+  width:100vw;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: linear-gradient(135deg, #667eea, #764ba2, #ff7a00);
+}
+
+.login-box{
+  background:white;
+  padding:40px;
+  border-radius:10px;
+  width:320px;
+  text-align:center;
+  box-shadow:0px 4px 15px rgba(0,0,0,0.3);
+}
+
+.login-box input{
+  width:100%;
+  padding:10px;
+  margin:10px 0;
+}
+
+.login-box button{
+  width:120px;
+  padding:10px;
+  background:#1e5bd8;
+  color:white;
+  border:none;
+  border-radius:5px;
+}
