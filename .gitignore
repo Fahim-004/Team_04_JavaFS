@@ -1,3 +1,6 @@
 .DS_Store
+<<<<<<< HEAD
 node_modules
 target
+=======
+>>>>>>> main
