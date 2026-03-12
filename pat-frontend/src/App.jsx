@@ -1,10 +1,26 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   return (
-    <div>
-      <LoginPage />
-    </div>
+    <AuthProvider>
+
+      <BrowserRouter>
+
+        <Routes>
+
+          <Route path="/" element={<LoginPage />} />
+
+          <Route path="/register" element={<RegisterPage />} />
+
+        </Routes>
+
+      </BrowserRouter>
+
+    </AuthProvider>
   );
 }
 

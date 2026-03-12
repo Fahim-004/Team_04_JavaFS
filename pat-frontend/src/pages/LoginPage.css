@@ -1,135 +1,58 @@
-body{
-
-  margin:0;
-  font-family: Arial, Helvetica, sans-serif;
+.page {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f4f6f8;
 }
 
-/* Background */
-
-.page{
-  height:100vh;
-  width:100vw;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-
-  background: linear-gradient(-45deg,#667eea,#764ba2,#ff7a00,#ff3cac);
-  background-size: 400% 400%;
-  animation: gradientBG 12s ease infinite;
+.login-box {
+  width: 350px;
+  padding: 35px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0px 10px 30px rgba(0,0,0,0.1);
+  text-align: center;
 }
 
-/* Login Card */
-
-.login-box{
-  background: rgba(255, 255, 255, 0.345);
-  padding:45px;
-  border-radius:15px;
-  width:340px;
-  text-align:center;
-  backdrop-filter: blur(10px);
-  box-shadow:0 15px 35px rgba(0,0,0,0.3);
-  transition:0.3s;
+.logo {
+  color: #2c7be5;
+  margin-bottom: 10px;
 }
 
-.login-box:hover{
-  transform: translateY(-5px);
+.input-field {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
-/* Title */
-
-.login-box h2{
-  margin-bottom:25px;
-  font-size:28px;
-  color:#333333dd;
+.btn {
+  width: 100%;
+  padding: 10px;
+  background: #2c7be5;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
-/* Input Fields */
-
-.input-field{
-  width:100%;
-  padding:12px;
-  margin:10px 0;
-  border-radius:8px;
-  border:1px solid #ccc;
-  outline:none;
-  transition:0.2s;
+.btn:hover {
+  background: #1a5ed8;
 }
 
-.input-field:focus{
-  border-color:#667eea;
-  box-shadow:0 0 5px rgba(102,126,234,0.5);
+.forgot {
+  font-size: 13px;
+  margin-top: 10px;
+  color: gray;
 }
 
-/* Button */
-
-.btn{
-  margin-top:15px;
-  padding:12px 25px;
-  background:#2e5fd3;
-  color:white;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  font-size:16px;
-  transition:0.3s;
+.signup {
+  margin-top: 15px;
 }
 
-.btn:hover{
-  background:#1d4cc2;
-  transform:scale(1.05);
-}
-
-.page{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:60px;
-}
-
-.page img{
-  width:350px;
-}
-@keyframes gradientBG {
-
-  0%{
-    background-position: 0% 50%;
-  }
-
-  50%{
-    background-position: 100% 50%;
-  }
-
-  100%{
-    background-position: 0% 50%;
-  }
-
-}
-@keyframes gradientBG{
-
-  0%{
-    background-position:0% 50%;
-  }
-
-  50%{
-    background-position:100% 50%;
-  }
-
-  100%{
-    background-position:0% 50%;
-  }
-}
-@keyframes gradientBG{
-
-  0%{
-    background-position:0% 50%;
-  }
-
-  50%{
-    background-position:100% 50%;
-  }
-
-  100%{
-    background-position:0% 50%;
-  }
-
+.signup span {
+  color: #2c7be5;
+  cursor: pointer;
 }
