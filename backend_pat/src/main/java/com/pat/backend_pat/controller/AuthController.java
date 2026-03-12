@@ -15,7 +15,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
-    private JwtUtil jwtUtil = new JwtUtil();
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     // Signup API
     @PostMapping("/signup")
@@ -34,7 +36,7 @@ public class AuthController {
                 request.getPassword()
         );
 
-        if(!isValid){
+        if (!isValid) {
             throw new RuntimeException("Invalid email or password");
         }
 
@@ -45,5 +47,4 @@ public class AuthController {
 
         return response;
     }
-
 }
