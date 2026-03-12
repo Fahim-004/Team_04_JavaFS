@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.pat.backend_pat.dto.LoginRequestDTO;
 import com.pat.backend_pat.dto.LoginResponse;
-import com.pat.backend_pat.entity.User;
+import com.pat.backend_pat.dto.SignupRequestDTO;
 import com.pat.backend_pat.security.JwtUtil;
 import com.pat.backend_pat.service.AuthService;
 
@@ -19,8 +19,11 @@ public class AuthController {
 
     // Signup API
     @PostMapping("/signup")
-    public User signup(@RequestBody User user) {
-        return authService.registerUser(user);
+    public String signup(@RequestBody SignupRequestDTO request) {
+
+        authService.registerUser(request);
+
+        return "User registered successfully";
     }
 
     // Login API
