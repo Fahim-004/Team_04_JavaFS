@@ -13,12 +13,9 @@ body{
   justify-content:center;
   align-items:center;
 
- /* background: linear-gradient(-45deg,#667eea,#764ba2,#ff7a00,#ff3cac);*/
-  background-image : url("https://images.presentationgo.com/2025/11/digital-grid-background-data.jpg");
-  background-size: 100% 100%;
+  background: linear-gradient(-45deg,#667eea,#764ba2,#ff7a00,#ff3cac);
+  background-size: 400% 400%;
   animation: gradientBG 12s ease infinite;
-  position:relative;
-  overflow:hidden;
 }
 
 /* Login Card */
@@ -91,4 +88,48 @@ body{
 
 .page img{
   width:350px;
+}
+@keyframes gradientBG {
+
+  0%{
+    background-position: 0% 50%;
+  }
+
+  50%{
+    background-position: 100% 50%;
+  }
+
+  100%{
+    background-position: 0% 50%;
+  }
+
+}
+@keyframes gradientBG{
+
+  0%{
+    background-position:0% 50%;
+  }
+
+  50%{
+    background-position:100% 50%;
+  }
+
+  100%{
+    background-position:0% 50%;
+  }
+}
+@keyframes gradientBG{
+
+  0%{
+    background-position:0% 50%;
+  }
+
+  50%{
+    background-position:100% 50%;
+  }
+
+  100%{
+    background-position:0% 50%;
+  }
+
 }
