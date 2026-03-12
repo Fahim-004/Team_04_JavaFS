@@ -22,7 +22,6 @@ public class AuthController {
     public String signup(@RequestBody SignupRequestDTO request) {
 
         authService.registerUser(request);
-
         return "User registered successfully";
     }
 
