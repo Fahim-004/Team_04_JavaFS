@@ -28,3 +28,8 @@ yarn-error.log*
 
 # OS files
 .DS_Store
+node_modules
+target
+
+.project 
+.settings/ 
