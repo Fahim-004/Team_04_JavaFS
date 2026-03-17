@@ -75,7 +75,8 @@ The `schema.sql` file contains the full database schema.
 
 1. Open **MySQL Workbench**
 2. Connect to your MySQL server
-3. Click:
+3. **Run this command first before proceeeding ahead** : DROP database pat_system;
+4. Click:
 
 ```
 File → Open SQL Script
