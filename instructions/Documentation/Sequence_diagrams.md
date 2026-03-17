@@ -1,4 +1,5 @@
 # Placement Automation Tool (PAT)
+
 ## Sequence Diagrams
 
 This document illustrates key workflows in the Placement Automation Tool.
@@ -17,10 +18,18 @@ sequenceDiagram
 
     Student->>Frontend: Register account
     Frontend->>Backend: POST /auth/register
-    Backend->>Database: Save user
-    Database-->>Backend: Success
-    Backend-->>Frontend: Registration success
-    Frontend-->>Student: Account created
+
+    Backend->>Backend: Validate input
+
+    alt Validation Failed
+        Backend-->>Frontend: Error response
+        Frontend-->>Student: Show error message
+    else Validation Success
+        Backend->>Database: Save user
+        Database-->>Backend: Success
+        Backend-->>Frontend: Registration success
+        Frontend-->>Student: Account created
+    end
 ```
 
 ---
@@ -37,11 +46,19 @@ sequenceDiagram
 
     Student->>Frontend: Click Apply Job
     Frontend->>Backend: POST /jobs/{job_id}/apply
-    Backend->>Database: Validate eligibility
-    Database-->>Backend: Eligible
-    Backend->>Database: Create application
-    Backend-->>Frontend: Application successful
-    Frontend-->>Student: Application submitted
+
+    Backend->>Database: Fetch job + eligibility data
+    Backend->>Backend: Validate eligibility
+
+    alt Not Eligible
+        Backend-->>Frontend: Application rejected
+        Frontend-->>Student: Show rejection reason
+    else Eligible
+        Backend->>Database: Create application
+        Database-->>Backend: Success
+        Backend-->>Frontend: Application successful
+        Frontend-->>Student: Application submitted
+    end
 ```
 
 ---
@@ -58,10 +75,18 @@ sequenceDiagram
 
     Employer->>Frontend: Create Job
     Frontend->>Backend: POST /jobs
-    Backend->>Database: Save job posting
-    Database-->>Backend: Job saved
-    Backend-->>Frontend: Job created
-    Frontend-->>Employer: Job visible
+
+    Backend->>Backend: Validate job data
+
+    alt Validation Failed
+        Backend-->>Frontend: Error response
+        Frontend-->>Employer: Show validation errors
+    else Validation Success
+        Backend->>Database: Save job posting
+        Database-->>Backend: Success
+        Backend-->>Frontend: Job created
+        Frontend-->>Employer: Job visible
+    end
 ```
 
 ---
@@ -79,11 +104,19 @@ sequenceDiagram
 
     Employer->>Frontend: Update round result
     Frontend->>Backend: PUT /applications/{id}/status
-    Backend->>Database: Update status
-    Database-->>Backend: Success
-    Backend->>Database: Create notification
-    Backend-->>Frontend: Update complete
-    Frontend-->>Student: Status updated notification
+
+    Backend->>Backend: Validate request
+
+    alt Validation Failed
+        Backend-->>Frontend: Error response
+        Frontend-->>Employer: Show error
+    else Validation Success
+        Backend->>Database: Update status
+        Database-->>Backend: Success
+        Backend->>Database: Create notification
+        Backend-->>Frontend: Update complete
+        Frontend-->>Student: Status updated notification
+    end
 ```
 
 ---
@@ -92,9 +125,9 @@ sequenceDiagram
 
 The diagrams represent the main system operations:
 
-1. Student registration
-2. Job application
-3. Employer job posting
-4. Recruitment round updates
+1. Student registration with validation
+2. Job application with eligibility checks
+3. Employer job posting with strict validation
+4. Recruitment round updates with validation and notification
 
-These workflows define the primary interactions between users and the PAT system.
+These workflows define both **successful and failure paths** in the system.
