@@ -40,20 +40,21 @@ FOREIGN KEY (user_id) REFERENCES users(user_id)
 
 CREATE TABLE jobs (
 job_id INT AUTO_INCREMENT PRIMARY KEY,
-employer_id INT,
-job_title VARCHAR(255),
+employer_id INT NOT NULL,
+job_title VARCHAR(255) NOT NULL,
 job_description TEXT,
-salary_package VARCHAR(100),
+salary_package VARCHAR(100) NOT NULL,
 job_location VARCHAR(100),
 min_cgpa DECIMAL(3,2),
 eligible_branches TEXT,
 max_backlogs INT,
 passing_year INT,
-application_deadline DATE,
-placement_drive_date DATE,
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+application_deadline DATE NOT NULL,
+placement_drive_date DATE NOT NULL,
+created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 FOREIGN KEY (employer_id) REFERENCES employers(employer_id)
 );
+
 
 CREATE TABLE resumes (
 resume_id INT AUTO_INCREMENT PRIMARY KEY,
