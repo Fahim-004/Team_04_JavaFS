@@ -45,18 +45,18 @@ erDiagram
 
     JOBS {
         int job_id PK
-        int employer_id FK (NOT NULL)
-        string job_title (NOT NULL)
+        int employer_id FK
+        string job_title
         text job_description
-        string salary_package (NOT NULL)
+        string salary_package
         string job_location
         decimal min_cgpa
         text eligible_branches
         int max_backlogs
         int passing_year
-        date application_deadline (NOT NULL)
-        date placement_drive_date (NOT NULL)
-        datetime created_at (NOT NULL)
+        date application_deadline
+        date placement_drive_date
+        datetime created_at
     }
 
     RESUMES {
@@ -130,36 +130,10 @@ erDiagram
 
 ---
 
-# Relationship Summary
+# Important Note
 
-### User Relationships
+* This ER diagram represents **structure and relationships only**
+* Field constraints such as `NOT NULL` and validation rules are defined in:
 
-* A **User** can be either a **Student**, **Employer**, or **Admin**
-* Student and Employer profiles extend the Users table
-
-### Employer Relationships
-
-* One employer can post multiple jobs
-
-### Student Relationships
-
-* A student can upload multiple resumes
-* A student can apply to multiple jobs
-
-### Job Relationships
-
-* Each job can have multiple applicants
-* Each job can have multiple recruitment rounds
-
-### Recruitment Process
-
-* Each application goes through multiple recruitment rounds
-* Each round result is stored separately
-
-### Notifications
-
-* Any user (student/employer/admin) can receive notifications
-
-### Analytics
-
-* Each student has analytics data summarizing placement activity
+  * Database schema document
+  * SRS document
