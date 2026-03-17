@@ -1,4 +1,5 @@
 # Placement Automation Tool (PAT)
+
 ## Entity Relationship Diagram (ERD)
 
 This ER diagram represents the core data relationships for the Placement Automation Tool.
@@ -12,7 +13,7 @@ erDiagram
         int user_id PK
         string email
         string password_hash
-        string role
+        enum role
         datetime created_at
     }
 
@@ -23,7 +24,7 @@ erDiagram
         string phone_number
         string usn
         string branch
-        float cgpa
+        decimal cgpa
         int backlog_count
         int passing_year
         text skills
@@ -44,18 +45,18 @@ erDiagram
 
     JOBS {
         int job_id PK
-        int employer_id FK
-        string job_title
+        int employer_id FK (NOT NULL)
+        string job_title (NOT NULL)
         text job_description
-        string salary_package
+        string salary_package (NOT NULL)
         string job_location
-        float min_cgpa
+        decimal min_cgpa
         text eligible_branches
         int max_backlogs
         int passing_year
-        date application_deadline
-        date placement_drive_date
-        datetime created_at
+        date application_deadline (NOT NULL)
+        date placement_drive_date (NOT NULL)
+        datetime created_at (NOT NULL)
     }
 
     RESUMES {
@@ -132,37 +133,33 @@ erDiagram
 # Relationship Summary
 
 ### User Relationships
-- A **User** can be either a **Student**, **Employer**, or **Admin**.
-- Student and Employer profiles extend the Users table.
+
+* A **User** can be either a **Student**, **Employer**, or **Admin**
+* Student and Employer profiles extend the Users table
 
 ### Employer Relationships
-- One employer can **post multiple jobs**.
+
+* One employer can post multiple jobs
 
 ### Student Relationships
-- A student can **upload multiple resumes**.
-- A student can **apply to multiple jobs**.
+
+* A student can upload multiple resumes
+* A student can apply to multiple jobs
 
 ### Job Relationships
-- Each job can have **multiple applicants**.
-- Each job can have **multiple recruitment rounds**.
+
+* Each job can have multiple applicants
+* Each job can have multiple recruitment rounds
 
 ### Recruitment Process
-- Each application goes through **multiple recruitment rounds**.
-- Each round result is stored separately.
+
+* Each application goes through multiple recruitment rounds
+* Each round result is stored separately
 
 ### Notifications
-- Any user (student/employer/admin) can receive notifications.
+
+* Any user (student/employer/admin) can receive notifications
 
 ### Analytics
-- Each student has **analytics data summarizing their placement activity**.
 
----
-
-# Notes
-
-Possible improvements for production systems:
-
-- Separate **skills into a normalized table**
-- Add **interview scheduling tables**
-- Support **multi‑college architecture**
-- Store resumes in **cloud storage instead of DB**
+* Each student has analytics data summarizing placement activity

@@ -1,9 +1,10 @@
 # Placement Automation Tool (PAT)
+
 ## REST API Design
 
 This document defines the REST API endpoints for the Placement Automation Tool (PAT).
 
-Base URL example:
+Base URL:
 
 ```
 /api/v1
@@ -14,8 +15,6 @@ Base URL example:
 # 1. Authentication APIs
 
 ## Register User
-
-Creates a new account.
 
 ```
 POST /auth/register
@@ -28,14 +27,6 @@ POST /auth/register
   "email": "student@email.com",
   "password": "securepassword",
   "role": "student"
-}
-```
-
-### Response
-
-```json
-{
-  "message": "User registered successfully"
 }
 ```
 
@@ -67,38 +58,12 @@ POST /auth/login
 
 ---
 
-## Logout
-
-```
-POST /auth/logout
-```
-
----
-
 # 2. Student APIs
 
 ## Get Student Profile
 
 ```
 GET /students/profile
-```
-
-### Response
-
-```json
-{
-  "full_name": "John Doe",
-  "phone_number": "9876543210",
-  "usn": "1RV21CS001",
-  "branch": "CSE",
-  "cgpa": 8.5,
-  "backlog_count": 0,
-  "passing_year": 2026,
-  "skills": ["Java", "React"],
-  "projects": "Placement portal",
-  "linkedin_url": "",
-  "github_url": ""
-}
 ```
 
 ---
@@ -109,29 +74,12 @@ GET /students/profile
 PUT /students/profile
 ```
 
-### Request
-
-```json
-{
-  "full_name": "John Doe",
-  "phone_number": "9876543210",
-  "cgpa": 8.7,
-  "skills": ["React", "Node"]
-}
-```
-
 ---
 
 ## Upload Resume
 
 ```
 POST /students/resume
-```
-
-### Form Data
-
-```
-resume_file: file
 ```
 
 ---
@@ -179,7 +127,7 @@ POST /jobs/{job_id}/apply
 
 ```json
 {
-  "resume_id": "123"
+  "resume_id": 123
 }
 ```
 
@@ -218,22 +166,48 @@ POST /employers/profile
 POST /jobs
 ```
 
-### Request
+### Request (Validated)
 
 ```json
 {
   "job_title": "Software Engineer",
-  "job_description": "Backend development",
   "salary_package": "18 LPA",
+  "application_deadline": "2026-10-20",
+  "placement_drive_date": "2026-10-25",
+
+  "job_description": "Backend development",
   "job_location": "Bangalore",
-  "min_cgpa": 7,
+  "min_cgpa": 7.0,
   "eligible_branches": ["CSE", "ISE"],
   "max_backlogs": 0,
-  "passing_year": 2026,
-  "application_deadline": "2026-10-20",
-  "placement_drive_date": "2026-10-25"
+  "passing_year": 2026
 }
 ```
+
+### Required Fields
+
+* job_title
+* salary_package
+* application_deadline
+* placement_drive_date
+
+### Optional Fields
+
+* job_description
+* job_location
+* min_cgpa
+* eligible_branches
+* max_backlogs
+* passing_year
+
+### Validation Rules
+
+* job_title must not be empty
+* salary_package must not be empty
+* application_deadline must be a valid future date
+* placement_drive_date must be ≥ application_deadline
+* min_cgpa (if provided) must be between 0–10
+* max_backlogs (if provided) must be ≥ 0
 
 ---
 
@@ -269,15 +243,6 @@ GET /jobs/{job_id}/applicants
 POST /jobs/{job_id}/rounds
 ```
 
-### Request
-
-```json
-{
-  "round_name": "Technical Interview",
-  "round_order": 2
-}
-```
-
 ---
 
 ## Get Job Rounds
@@ -294,15 +259,6 @@ GET /jobs/{job_id}/rounds
 PUT /applications/{application_id}/round-result
 ```
 
-### Request
-
-```json
-{
-  "round_id": "12",
-  "status": "Passed"
-}
-```
-
 ---
 
 # 6. Application Management APIs
@@ -311,14 +267,6 @@ PUT /applications/{application_id}/round-result
 
 ```
 PUT /applications/{application_id}/status
-```
-
-### Request
-
-```json
-{
-  "status": "Shortlisted"
-}
 ```
 
 ---
@@ -389,17 +337,6 @@ DELETE /admin/employers/{employer_id}
 GET /admin/statistics
 ```
 
-### Example Response
-
-```json
-{
-  "total_students": 420,
-  "total_companies": 35,
-  "total_jobs": 18,
-  "total_applications": 560
-}
-```
-
 ---
 
 # 9. Analytics APIs
@@ -410,42 +347,21 @@ GET /admin/statistics
 GET /students/analytics
 ```
 
-### Response
-
-```json
-{
-  "applications_count": 8,
-  "shortlisted_count": 3,
-  "interviews_given": 2
-}
-```
-
 ---
 
-# 10. Security Considerations
+# 10. Security & Validation Rules
 
-- All APIs require **JWT authentication**
-- Role-based access control should be implemented
-- Passwords must be **hashed before storage**
-- Input validation should be applied to all endpoints
+* All APIs require JWT authentication
+* Role-based access control enforced
+* Input validation must be handled at backend layer
+* Never rely only on database constraints for validation
 
 ---
 
 # API Roles Summary
 
-| Role | Access |
-|-----|-----|
-| Student | Profile, Resume, Jobs, Applications |
+| Role     | Access                               |
+| -------- | ------------------------------------ |
+| Student  | Profile, Resume, Jobs, Applications  |
 | Employer | Jobs, Applicants, Recruitment Rounds |
-| Admin | Employer approval, System monitoring |
-
----
-
-# Future API Extensions
-
-Possible future additions:
-
-- Email notification APIs
-- Interview scheduling APIs
-- University data integration
-- AI resume analysis endpoints
+| Admin    | Employer approval, System monitoring |

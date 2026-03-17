@@ -1,4 +1,5 @@
 # Placement Automation Tool (PAT)
+
 ## Software Requirements Specification (SRS)
 
 ---
@@ -7,15 +8,15 @@
 
 ## 1.1 Purpose
 
-The purpose of this document is to describe the functional and non‑functional requirements of the **Placement Automation Tool (PAT)**.
+The purpose of this document is to describe the functional and non-functional requirements of the Placement Automation Tool (PAT).
 
 PAT is a web-based system designed to automate and streamline the campus placement process by providing a centralized platform for:
 
-- Students
-- Employers
-- College administrators
+* Students
+* Employers
+* College administrators
 
-This document serves as a reference for developers, stakeholders, and reviewers involved in the project.
+This document serves as a reference for developers, stakeholders, and reviewers.
 
 ---
 
@@ -25,23 +26,23 @@ The Placement Automation Tool (PAT) manages the entire campus recruitment lifecy
 
 The system allows:
 
-- Students to create profiles and apply for jobs
-- Employers to post job opportunities and manage recruitment rounds
-- College administrators to monitor and manage placement activities
+* Students to create profiles and apply for jobs
+* Employers to post job opportunities and manage recruitment rounds
+* College administrators to monitor and manage placement activities
 
-The initial version of the system supports **a single college**, with potential future expansion to **multi‑college support**.
+The system enforces **strict validation rules and eligibility constraints** to ensure data consistency.
 
 ---
 
 ## 1.3 Definitions
 
-| Term | Description |
-|-----|-------------|
-| PAT | Placement Automation Tool |
-| Admin | College placement administrator |
-| Employer | Company recruiter |
-| USN | University Seat Number |
-| Applicant | Student who applied for a job |
+| Term      | Description                     |
+| --------- | ------------------------------- |
+| PAT       | Placement Automation Tool       |
+| Admin     | College placement administrator |
+| Employer  | Company recruiter               |
+| USN       | University Seat Number          |
+| Applicant | Student who applied for a job   |
 
 ---
 
@@ -49,14 +50,18 @@ The initial version of the system supports **a single college**, with potential 
 
 ## 2.1 System Perspective
 
-PAT replaces manual placement workflows that rely on:
+PAT replaces manual workflows involving:
 
-- spreadsheets
-- emails
-- messaging groups
-- manual eligibility filtering
+* Spreadsheets
+* Emails
+* Messaging groups
+* Manual filtering
 
-The system provides a **centralized platform** where all placement activities are managed.
+The system ensures:
+
+* All inputs are validated
+* All actions follow defined rules
+* Invalid operations are rejected
 
 ---
 
@@ -64,38 +69,30 @@ The system provides a **centralized platform** where all placement activities ar
 
 ### Students
 
-Students use PAT to:
-
-- Create profiles
-- Upload resumes
-- Apply for job opportunities
-- Track application progress
-- Receive placement notifications
+* Create profiles
+* Upload resumes
+* Apply for jobs
+* Track applications
+* Receive notifications
 
 ---
 
 ### Employers
 
-Employers use PAT to:
-
-- Register company accounts
-- Post job opportunities
-- Define eligibility criteria
-- Manage recruitment rounds
-- Track candidate progress
+* Register company accounts
+* Post jobs (with validation rules)
+* Define eligibility criteria
+* Manage recruitment rounds
+* Track applicants
 
 ---
 
-### College Admin
+### Admin
 
-The College Admin oversees the system and ensures smooth operation.
-
-Responsibilities include:
-
-- Approving employer accounts
-- Monitoring platform activity
-- Viewing placement statistics
-- Managing student and employer data
+* Approve employers
+* Monitor system activity
+* View statistics
+* Maintain system integrity
 
 ---
 
@@ -103,270 +100,244 @@ Responsibilities include:
 
 ## 3.1 User Authentication
 
-The system must allow users to:
+* Register with email and password
+* Login securely
+* Logout
 
-- Register using **email and password**
-- Log in securely
-- Log out of the system
+Roles:
 
-Supported roles:
+* Student
+* Employer
+* Admin
 
-- Student
-- Employer
-- Admin
+Authentication uses:
 
-Authentication is implemented using:
-
-- Spring Security
-- JWT tokens
+* Spring Security
+* JWT
 
 ---
 
-## 3.2 Student Registration and Profile
+## 3.2 Student Profile
 
-Students must be able to:
+Students must:
 
-- Register using email
-- Complete their profile
+* Register
+* Complete profile
 
-### Student Profile Fields
+### Fields
 
-#### Personal Information
-
-- Full Name
-- Phone Number
-- Email
-- USN (Mandatory)
-
-#### Academic Information
-
-- Branch / Department
-- CGPA
-- Backlog count
-- Passing year
-
-#### Professional Information
-
-- Skills
-- Projects
-- LinkedIn (optional)
-- GitHub (optional)
+* Full Name
+* Phone Number
+* Email
+* USN (Mandatory)
+* Branch
+* CGPA
+* Backlog count
+* Passing year
+* Skills
+* Projects
+* LinkedIn (optional)
+* GitHub (optional)
 
 ---
 
 ## 3.3 Resume Management
 
-Students must upload a resume before applying for jobs.
-
-Rules:
-
-- Resume upload is **mandatory**
-- Students may update their resume anytime
-- Students can upload **custom resumes for specific jobs**
-
-Resumes are stored in the **database**.
+* Resume required before applying
+* Multiple resumes allowed
+* Resume can be updated
 
 ---
 
 ## 3.4 Employer Registration
 
-Employers must:
-
-1. Register on the platform
-2. Wait for **Admin approval**
-
-After approval, employers can:
-
-- Post jobs
-- Manage applicants
-- Create recruitment rounds
+* Employer registers
+* Admin approval required
+* Only approved employers can post jobs
 
 ---
 
 ## 3.5 Job Posting
 
-Employers can create job listings with the following fields:
+### Required Fields
 
-- Company Name
-- Job Role / Title
-- Job Description
-- Salary / Package
-- Job Location
-- Eligibility Criteria
-- Application Deadline
-- Placement Drive Date
+* Job Title
+* Salary Package
+* Application Deadline
+* Placement Drive Date
+
+### Optional Fields
+
+* Job Description
+* Job Location
+* Minimum CGPA
+* Eligible Branches
+* Maximum Backlogs
+* Passing Year
+
+---
+
+### Validation Rules
+
+* Required fields must not be empty
+* Application deadline must be future date
+* Placement drive date ≥ application deadline
+* CGPA (if provided) must be between 0–10
+* Backlogs (if provided) must be ≥ 0
+
+---
+
+### Failure Handling
+
+* Invalid requests are rejected
+* Error messages returned
+* No invalid data stored
 
 ---
 
 ## 3.6 Eligibility Filtering
 
-Eligibility criteria may include:
+* Criteria enforced only if provided
+* NULL values are ignored
 
-- Minimum CGPA
-- Eligible branches
-- Backlog status
-- Passing year
+Example:
 
-The system automatically determines **which students are eligible**.
+* No CGPA → no CGPA filter
+* No passing year → all eligible
 
 ---
 
 ## 3.7 Job Application
 
-Students can:
+### Requirements
 
-- View eligible job opportunities
-- Apply for jobs
-
-Requirements:
-
-- Resume must be uploaded
-- Custom resume optional
-
-Students may apply to **multiple companies** if eligible.
-
-Students can still apply even after getting placed.
+* Resume must exist
+* Job must exist
+* Student must be eligible
 
 ---
 
-## 3.8 Applicant Management (Employer)
+### Validation
 
-Employers can:
-
-- View applicants for a job
-- Filter applicants by:
-
-  - CGPA
-  - Branch
-  - Skills
-
-- Download student resumes
-
-Employers can only see **students who applied** to their jobs.
+* Check eligibility
+* Check resume
+* Check job
 
 ---
 
-## 3.9 Recruitment Round Management
+### Failure Handling
 
-Employers can define **custom recruitment rounds**.
-
-Examples:
-
-- Aptitude Test
-- Coding Round
-- Technical Interview
-- HR Interview
-
-Employers update **results individually for each student**.
+* Reject invalid applications
+* Return error response
 
 ---
 
-## 3.10 Application Status Tracking
+## 3.8 Applicant Management
 
-Students can track their application status.
+* View applicants
+* Filter by CGPA, branch, skills
 
-Possible statuses:
+Rules:
 
-- Applied
-- Shortlisted
-- Round 1 Cleared
-- Round 2 Cleared
-- Selected
-- Rejected
+* Filters apply only if provided
+* No filter → full results
 
 ---
 
-## 3.11 Notification System
+## 3.9 Recruitment Rounds
 
-The platform provides **in‑platform notifications** for:
-
-- New job postings
-- Interview updates
-- Recruitment results
-- Selection notifications
+* Custom rounds allowed
+* Must have order
+* Order must be unique and sequential
 
 ---
 
-## 3.12 Student Dashboard
+## 3.10 Application Status
 
-The student dashboard shows:
-
-- Profile completion status
-- Eligible job opportunities
-- Applied jobs
-- Application status
-- Placement analytics
+* Must follow valid progression
+* Invalid transitions rejected
 
 ---
 
-## 3.13 Student Analytics
+## 3.11 Notifications
 
-Students can view:
+Triggers:
 
-- Number of companies applied
-- Number of shortlisted applications
-- Number of interviews attended
+* Job creation
+* Application updates
+* Round updates
+
+Rules:
+
+* Must be user-specific
+* Read/unread tracked
+
+---
+
+## 3.12 Dashboard
+
+Shows:
+
+* Profile completion
+* Eligible jobs
+* Applications
+* Status
+* Analytics
+
+---
+
+## 3.13 Analytics
+
+* Applications count
+* Shortlisted count
+* Interviews
 
 ---
 
 ## 3.14 Admin Controls
 
-The College Admin can:
-
-- View all students
-- View all employers
-- Approve employer accounts
-- Remove fake companies
-- View placement statistics
-
-Admin **cannot post jobs on behalf of employers**.
+* Approve employers
+* View users
+* Monitor system
+* Remove invalid data
 
 ---
 
-# 4. Non‑Functional Requirements
+# 4. Non-Functional Requirements
 
 ## Performance
 
-The system should support multiple concurrent users without performance degradation.
+* Handle multiple concurrent users
 
 ---
 
 ## Security
 
-Security measures include:
-
-- JWT authentication
-- Secure password hashing
-- Role-based access control
+* JWT authentication
+* Password hashing
+* Role-based access
+* API-level validation
 
 ---
 
 ## Scalability
 
-The architecture should support future expansion to:
-
-- Multi‑college placement systems
-- Larger user bases
+* Extendable to multi-college system
 
 ---
 
 ## Reliability
 
-The system must ensure:
-
-- Consistent database operations
-- Accurate tracking of applications
-- Reliable data storage
+* Strict validation before DB operations
+* No invalid data stored
+* Consistent behavior
 
 ---
 
 # 5. Future Scope
 
-Potential future improvements include:
-
-- Multi‑college placement network
-- Email notifications
-- AI‑based resume analysis
-- Interview scheduling
-- University academic data integration
-- Advanced placement analytics
+* Multi-college system
+* Email notifications
+* AI resume analysis
+* Interview scheduling
+* Advanced analytics
