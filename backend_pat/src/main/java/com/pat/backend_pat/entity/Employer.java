@@ -13,7 +13,10 @@ public class Employer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long employerId;
+    private Integer employerId;
+    
+  
+    private Integer userId;
 
     @Column(nullable = false)
     private String companyName;
