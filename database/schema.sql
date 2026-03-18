@@ -30,11 +30,11 @@ FOREIGN KEY (user_id) REFERENCES users(user_id)
 
 CREATE TABLE employers (
 employer_id INT AUTO_INCREMENT PRIMARY KEY,
-user_id INT UNIQUE,
-company_name VARCHAR(255),
-company_description TEXT,
-approved_status BOOLEAN DEFAULT FALSE,
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+user_id INT UNIQUE NOT NULL,
+company_name VARCHAR(255) NOT NULL,
+company_description TEXT NOT NULL,
+approved_status BOOLEAN DEFAULT FALSE NOT NULL,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
