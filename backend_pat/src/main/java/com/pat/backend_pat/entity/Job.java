@@ -2,6 +2,8 @@ package com.pat.backend_pat.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -33,8 +35,10 @@ public class Job {
 	@Column(nullable = false)
 	private String jobLocation;
 	
-	private Double minCgpa;
+	@Column(precision = 3, scale = 2)
+	private BigDecimal minCgpa;
 	
+	@Column(columnDefinition = "TEXT")
 	private String eligibleBranches;
 	
 	private Integer maxBacklogs;
