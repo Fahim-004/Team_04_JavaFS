@@ -15,7 +15,7 @@ public class Employer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer employerId;
     
-  
+    @Column(nullable = false, unique = true)
     private Integer userId;
 
     @Column(nullable = false)
@@ -27,6 +27,6 @@ public class Employer {
     @Column(nullable = false)
     private Boolean approvedStatus = false;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(nullable = false, insertable = false, updatable = false)
+    private LocalDateTime createdAt;
 }

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class Job {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int jobId;
+	private Integer jobId;
 	
 	
 	@ManyToOne
@@ -24,10 +24,13 @@ public class Job {
 	@Column(nullable = false)
 	private String jobTitle;
 	
+	@Column(nullable = false)
 	private String jobDescription;
 	
+	@Column(nullable = false)
 	private String salaryPackage;
 	
+	@Column(nullable = false)
 	private String jobLocation;
 	
 	private Double minCgpa;
@@ -44,14 +47,8 @@ public class Job {
 	@Column(nullable = false)
 	private LocalDate placementDriveDate;
 	
-	@Column(nullable = false)
+	@Column(nullable = false, insertable = false, updatable = false)
 	private LocalDateTime createdAt;
-	
-	@PrePersist
-	protected void onCreate() {
-		this.createdAt =  LocalDateTime.now();
-	}
-	
 	
 
 }
