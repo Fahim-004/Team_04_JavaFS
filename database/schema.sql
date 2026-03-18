@@ -30,11 +30,11 @@ FOREIGN KEY (user_id) REFERENCES users(user_id)
 
 CREATE TABLE employers (
 employer_id INT AUTO_INCREMENT PRIMARY KEY,
-user_id INT UNIQUE,
-company_name VARCHAR(255),
-company_description TEXT,
-approved_status BOOLEAN DEFAULT FALSE,
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+user_id INT UNIQUE NOT NULL,
+company_name VARCHAR(255) NOT NULL,
+company_description TEXT NOT NULL,
+approved_status BOOLEAN DEFAULT FALSE NOT NULL,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
@@ -42,9 +42,9 @@ CREATE TABLE jobs (
 job_id INT AUTO_INCREMENT PRIMARY KEY,
 employer_id INT NOT NULL,
 job_title VARCHAR(255) NOT NULL,
-job_description TEXT,
+job_description TEXT NOT NULL,
 salary_package VARCHAR(100) NOT NULL,
-job_location VARCHAR(100),
+job_location VARCHAR(100) NOT NULL,
 min_cgpa DECIMAL(3,2),
 eligible_branches TEXT,
 max_backlogs INT,
