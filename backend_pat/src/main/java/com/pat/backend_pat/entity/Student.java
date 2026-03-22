@@ -1,6 +1,7 @@
 package com.pat.backend_pat.entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import lombok.*;
 
 @Entity
@@ -38,7 +39,7 @@ public class Student {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    private Double cgpa;
+    private BigDecimal cgpa;
 
     @Column(name = "backlog_count")
     private Integer backlogCount;
@@ -57,5 +58,5 @@ public class Student {
 
     // Boolean field (fixed)
     @Column(name = "profile_completed", nullable = false)
-    private Boolean profileComplete = false;
+    private Boolean profileCompleted = false;
 }
