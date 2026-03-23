@@ -11,7 +11,7 @@ function RegisterPage() {
 
     try {
 
-      await fetch("http://localhost:8080/auth/register", {
+      await fetch("http://localhost:8080/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
