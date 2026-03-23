@@ -40,7 +40,7 @@ When someone sends a request to your backend — for example, a student register
   "role": "student"
 }
 ```
-Spring Boot needs a Java class to map this JSON into. That class is a DTO.  
+Spring Boot needs a Java class to map this JSON into a Data Transfer Object. That class is a DTO.  
 You are building the "mold" that incoming and outgoing data must fit into.
 
 ---
