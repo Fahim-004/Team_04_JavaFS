@@ -15,7 +15,7 @@ public class Resume {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "resume_id")
-    private Long resumeId;
+    private Integer resumeId;
 
     // Many resumes → one student
     @ManyToOne(fetch = FetchType.LAZY)

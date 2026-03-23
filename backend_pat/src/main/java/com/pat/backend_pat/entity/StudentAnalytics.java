@@ -13,7 +13,7 @@ public class StudentAnalytics {
     // Primary key (same as student_id)
     @Id
     @Column(name = "student_id")
-    private Long studentId;
+    private Integer studentId;
 
     // One-to-One mapping with Student
     @OneToOne(fetch = FetchType.LAZY)

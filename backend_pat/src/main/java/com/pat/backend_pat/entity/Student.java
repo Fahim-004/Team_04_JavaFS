@@ -15,7 +15,7 @@ public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "student_id")
-    private Long studentId;
+    private Integer studentId;
 
     // One-to-One relationship with User
     @OneToOne(fetch = FetchType.LAZY)
