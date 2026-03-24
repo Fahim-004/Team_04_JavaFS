@@ -1,23 +1,24 @@
-const DashboardNavbar = () => {
+const DashboardNavbar = ({ title }) => {
+
+  const profile = JSON.parse(localStorage.getItem("profile")) || {};
+  const userName = profile.name || "Student";
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
   return (
-    <div className="flex justify-between items-center bg-white p-4 shadow">
-
-      <h2 className="text-xl font-semibold">
-        Student Portal
+    <div className="flex items-center justify-between px-6 py-4 bg-white border-b">
+      <h2 className="text-lg font-semibold text-gray-700">
+        {title || "Dashboard"}
       </h2>
-
-      <div className="flex items-center space-x-4">
-
-        <span className="text-gray-600">
-          Welcome, Student
-        </span>
-
-        <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
-          Logout
-        </button>
-
+      <div className="text-sm text-gray-500">
+        {getGreeting()},{" "}
+        <span className="font-medium text-gray-700">{userName}</span> 👋
       </div>
-
     </div>
   );
 };
