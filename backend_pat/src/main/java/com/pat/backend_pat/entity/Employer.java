@@ -15,7 +15,7 @@ public class Employer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer employerId;
     
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private Integer userId;
 
     @Column(nullable = false)
