@@ -39,7 +39,7 @@ public class User {
     private LocalDateTime createdAt;
 
     public enum Role {
-        STUDENT, EMPLOYER, ADMIN
+        student, employer, admin
     }
     public String getPasswordHash() {
         return passwordHash;
