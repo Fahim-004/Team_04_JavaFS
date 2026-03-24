@@ -1,15 +1,20 @@
-import React from "react";
-
-function InputField({ type, placeholder, value, onChange }) {
+const InputField = ({ type = "text", placeholder, value, onChange, label }) => {
   return (
-    <input
-      type={type}
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      className="input-field"
-    />
+    <div className="mb-4">
+      {label && (
+        <label className="block mb-2 font-medium text-gray-700">
+          {label}
+        </label>
+      )}
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
+    </div>
   );
-}
+};
 
 export default InputField;
