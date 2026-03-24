@@ -41,4 +41,15 @@ public class User {
     public enum Role {
         STUDENT, EMPLOYER, ADMIN
     }
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public Role getRole() {
+        return role;
+    }
 }

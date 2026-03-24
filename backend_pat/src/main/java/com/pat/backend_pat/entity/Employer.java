@@ -15,8 +15,9 @@ public class Employer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer employerId;
     
-    @Column(nullable = false, unique = true)
-    private Integer userId;
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false)
     private String companyName;
