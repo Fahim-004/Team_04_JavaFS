@@ -23,16 +23,16 @@ public class Student {
     private User user;
 
     // Required fields
-    @Column(name = "full_name", nullable = false)
+    @Column(name = "full_name")
     private String fullName;
 
-    @Column(name = "usn", nullable = false)
+    @Column(name = "usn")
     private String usn;
 
-    @Column(name = "branch", nullable = false)
+    @Column(name = "branch")
     private String branch;
 
-    @Column(name = "passing_year", nullable = false)
+    @Column(name = "passing_year")
     private Integer passingYear;
 
     // Optional fields
