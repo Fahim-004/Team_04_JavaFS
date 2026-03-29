@@ -1,3 +1,4 @@
+import ProtectedRoute from "../components/ProtectedRoute";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
@@ -28,8 +29,14 @@ const AppRoutes = () => {
         <Route path="/register" element={<RegisterPage />} />
 
         {/* Protected Routes */}
-        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-        <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+<Route
+  path="/dashboard"
+  element={
+    <ProtectedRoute>
+      <Dashboard />
+    </ProtectedRoute>
+  }
+/>        <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
         <Route path="/drives" element={<PrivateRoute><DrivesPage /></PrivateRoute>} />
         <Route path="/applications" element={<PrivateRoute><ApplicationsPage /></PrivateRoute>} />
         <Route path="/resume" element={<PrivateRoute><ResumePage /></PrivateRoute>} />
