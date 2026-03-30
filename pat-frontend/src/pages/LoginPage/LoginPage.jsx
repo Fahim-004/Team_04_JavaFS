@@ -40,7 +40,10 @@ const LoginPage = () => {
 
     login(data.token, data.role, data.userId);
 
-    navigate("/dashboard");
+    if (data.role === "student") navigate("/dashboard");
+    else if (data.role === "employer") navigate("/employer/dashboard");
+    else if (data.role === "admin") navigate("/admin/dashboard");
+    else navigate("/dashboard");
 
   } catch (err) {
     setError("Unable to connect to server. Please try again.");

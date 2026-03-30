@@ -41,6 +41,7 @@ public class User {
     public enum Role {
         student, employer, admin
     }
+
     public String getPasswordHash() {
         return passwordHash;
     }

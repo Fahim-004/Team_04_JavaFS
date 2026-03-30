@@ -7,7 +7,7 @@ const RegisterPage = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "STUDENT",
+    role: "student",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -137,8 +137,8 @@ const RegisterPage = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
               >
-                <option value="STUDENT">Student</option>
-                <option value="EMPLOYER">Employer</option>
+                <option value="student">Student</option>
+                <option value="employer">Employer</option>
               </select>
             </div>
 
