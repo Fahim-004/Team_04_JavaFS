@@ -22,49 +22,33 @@ const LoginPage = () => {
     return;
   }
 
-  // Temporary: skip API, login directly
-  login("temp-token");
-  navigate("/dashboard");
-};
-  
-  
-  /* const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
+  setLoading(true);
 
-    if (!email || !password) {
-      setError("Please fill in all fields.");
+  try {
+    const response = await fetch("http://localhost:8080/api/v1/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setError(data.message || "Invalid email or password.");
       return;
     }
 
-    setLoading(true);
+    login(data.token, data.role, data.userId);
 
-    try {
-      const response = await fetch("http://localhost:8080/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+    navigate("/dashboard");
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || "Invalid email or password.");
-        return;
-      }
-
-      login(data.token);
-      navigate("/dashboard");
-
-    } catch (err) {
-      setError("Unable to connect to server. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };*/
-
-
-
+  } catch (err) {
+    setError("Unable to connect to server. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 min-h-screen">
 
