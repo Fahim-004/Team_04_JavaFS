@@ -60,7 +60,6 @@ public class StudentController {
         }
     }
 
-
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(
             @Valid @RequestBody StudentProfileDTO dto) {
@@ -81,7 +80,6 @@ public class StudentController {
                     .body(ex.getMessage());
         }
     }
-
     @PostMapping("/resume")
     public ResponseEntity<?> uploadResume(
             @RequestParam String filePath) {
@@ -104,7 +102,6 @@ public class StudentController {
                     .body(ex.getMessage());
         }
     }
-
     @GetMapping("/resumes")
     public ResponseEntity<?> getResumes() {
 
