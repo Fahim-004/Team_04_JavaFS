@@ -2,9 +2,21 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { getStudentProfile, savePersonalDetails } from "../../services/api";
 
-const EMPTY = { fullName: "", phoneNumber: "", linkedinUrl: "", githubUrl: "" };
+const EMPTY = {
+  fullName: "",
+  phoneNumber: "",
+  usn: "",
+  branch: "",
+  cgpa: "",
+  backlogCount: "",
+  passingYear: "",
+  skills: "",
+  projects: "",
+  linkedinUrl: "",
+  githubUrl: "",
+};
 
-// ── Toast ─────────────────────────────────────────────────────
+// Toast notification component
 const Toast = ({ toast }) => {
   if (!toast) return null;
   const ok = toast.type === "success";
@@ -22,13 +34,11 @@ const Toast = ({ toast }) => {
   );
 };
 
-// ── Input field ───────────────────────────────────────────────
-const Field = ({ label, name, value, onChange, placeholder, type = "text", colSpan = 1 }) => (
-  <div className={colSpan === 2 ? "md:col-span-2" : ""}>
-    <label
-      className="block text-xs font-semibold uppercase tracking-wide mb-1.5"
-      style={{ color: "#6b7280" }}
-    >
+// Reusable input field component
+const Field = ({ label, name, value, onChange, placeholder, type = "text" }) => (
+  <div>
+    <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5"
+      style={{ color: "#6b7280" }}>
       {label}
     </label>
     <input
@@ -53,16 +63,16 @@ const Field = ({ label, name, value, onChange, placeholder, type = "text", colSp
   </div>
 );
 
-// ── Page ──────────────────────────────────────────────────────
 const ProfilePage = () => {
   const [form, setForm]       = useState(EMPTY);
   const [email, setEmail]     = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving]   = useState(false);
   const [toast, setToast]     = useState(null);
+  const [resumeFile, setResumeFile] = useState(null);
 
   useEffect(() => {
-    // Get email from localStorage (set by AuthContext on login)
+    // Read email from localStorage — saved by AuthContext on login
     const stored = localStorage.getItem("userEmail") || "";
     setEmail(stored);
 
@@ -72,6 +82,13 @@ const ProfilePage = () => {
           setForm({
             fullName:    res.data.fullName    || "",
             phoneNumber: res.data.phoneNumber || "",
+            usn:         res.data.usn         || "",
+            branch:      res.data.branch      || "",
+            cgpa:        res.data.cgpa        || "",
+            backlogCount: res.data.backlogCount || "",
+            passingYear: res.data.passingYear || "",
+            skills:      res.data.skills      || "",
+            projects:    res.data.projects    || "",
             linkedinUrl: res.data.linkedinUrl || "",
             githubUrl:   res.data.githubUrl   || "",
           });
@@ -88,14 +105,20 @@ const ProfilePage = () => {
     setSaving(true);
     try {
       await savePersonalDetails(form);
-      if (form.fullName) {
-        localStorage.setItem("userName", form.fullName.split(" ")[0]);
-      }
-      showToast("success", "Personal details saved successfully!");
+      showToast("success", "Profile updated successfully!");
     } catch {
       showToast("error", "Failed to save. Please try again.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleResumeUpload = () => {
+    if (resumeFile) {
+      console.log("Resume file selected:", resumeFile.name);
+      alert("Resume upload will be wired tomorrow. File selected: " + resumeFile.name);
+    } else {
+      alert("Please select a PDF file first.");
     }
   };
 
@@ -117,29 +140,24 @@ const ProfilePage = () => {
         <p className="text-xs mb-1" style={{ color: "#9ca3af" }}>Dashboard / Profile</p>
         <h1 className="text-2xl font-semibold" style={{ color: "#111827" }}>My Profile</h1>
         <p className="text-sm mt-1" style={{ color: "#6b7280" }}>
-          Keep your personal details up to date.
+          Keep your profile up to date for placement opportunities.
         </p>
       </div>
 
       {/* Card */}
-      <div
-        className="rounded-2xl overflow-hidden"
-        style={{ background: "#fff", border: "1px solid #e5e7f0", maxWidth: "780px" }}
-      >
+      <div className="rounded-2xl overflow-hidden"
+        style={{ background: "#fff", border: "1px solid #e5e7f0", maxWidth: "780px" }}>
+
         {/* Card header */}
-        <div
-          className="flex items-center gap-3 px-6 py-4"
-          style={{ borderBottom: "1px solid #e5e7f0", background: "#fafbff" }}
-        >
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: "#eef2fe", fontSize: "14px" }}
-          >
+        <div className="flex items-center gap-3 px-6 py-4"
+          style={{ borderBottom: "1px solid #e5e7f0", background: "#fafbff" }}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ background: "#eef2fe", fontSize: "14px" }}>
             👤
           </div>
           <div>
-            <p className="text-sm font-semibold" style={{ color: "#111827" }}>Personal details</p>
-            <p className="text-xs" style={{ color: "#9ca3af" }}>Your basic contact information</p>
+            <p className="text-sm font-semibold" style={{ color: "#111827" }}>Student Profile</p>
+            <p className="text-xs" style={{ color: "#9ca3af" }}>Academic and personal details</p>
           </div>
         </div>
 
@@ -151,14 +169,10 @@ const ProfilePage = () => {
           ) : (
             <>
               {/* Avatar */}
-              <div
-                className="flex items-center gap-4 mb-6 pb-5"
-                style={{ borderBottom: "1px solid #f0f2f8" }}
-              >
-                <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-semibold flex-shrink-0"
-                  style={{ background: "#eef2fe", color: "#4c7ef0" }}
-                >
+              <div className="flex items-center gap-4 mb-6 pb-5"
+                style={{ borderBottom: "1px solid #f0f2f8" }}>
+                <div className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-semibold flex-shrink-0"
+                  style={{ background: "#eef2fe", color: "#4c7ef0" }}>
                   {initials}
                 </div>
                 <div>
@@ -171,22 +185,69 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              {/* Fields */}
-              <p className="text-xs font-semibold uppercase tracking-wide mb-4" style={{ color: "#9ca3af" }}>
-                Contact information
+              {/* Personal Details */}
+              <p className="text-xs font-semibold uppercase tracking-wide mb-4"
+                style={{ color: "#9ca3af" }}>
+                Personal Information
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <Field label="Full name"         name="fullName"     value={form.fullName}     onChange={handleChange} placeholder="e.g. Priya Sharma" />
-                <Field label="Phone number"      name="phoneNumber"  value={form.phoneNumber}  onChange={handleChange} placeholder="+91 98765 43210" />
-                <Field label="LinkedIn profile"  name="linkedinUrl"  value={form.linkedinUrl}  onChange={handleChange} placeholder="linkedin.com/in/yourname" />
-                <Field label="GitHub profile"    name="githubUrl"    value={form.githubUrl}    onChange={handleChange} placeholder="github.com/yourusername" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <Field label="Full Name *"    name="fullName"    value={form.fullName}    onChange={handleChange} placeholder="e.g. Priya Sharma" />
+                <Field label="Phone Number"   name="phoneNumber" value={form.phoneNumber} onChange={handleChange} placeholder="+91 98765 43210" />
+                <Field label="LinkedIn URL"   name="linkedinUrl" value={form.linkedinUrl} onChange={handleChange} placeholder="linkedin.com/in/yourname" />
+                <Field label="GitHub URL"     name="githubUrl"   value={form.githubUrl}   onChange={handleChange} placeholder="github.com/yourusername" />
               </div>
 
-              {/* Email (read-only — from JWT/auth) */}
+              {/* Academic Details */}
+              <p className="text-xs font-semibold uppercase tracking-wide mb-4"
+                style={{ color: "#9ca3af" }}>
+                Academic Information
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <Field label="USN *"          name="usn"          value={form.usn}          onChange={handleChange} placeholder="e.g. 1PA21CS001" />
+                <Field label="Branch *"       name="branch"       value={form.branch}       onChange={handleChange} placeholder="e.g. CSE" />
+                <Field label="CGPA"           name="cgpa"         value={form.cgpa}         onChange={handleChange} placeholder="e.g. 8.5" type="number" />
+                <Field label="Backlog Count"  name="backlogCount" value={form.backlogCount} onChange={handleChange} placeholder="e.g. 0" type="number" />
+                <Field label="Passing Year"   name="passingYear"  value={form.passingYear}  onChange={handleChange} placeholder="e.g. 2025" type="number" />
+              </div>
+
+              {/* Skills and Projects */}
+              <p className="text-xs font-semibold uppercase tracking-wide mb-4"
+                style={{ color: "#9ca3af" }}>
+                Skills & Projects
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px" }}>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5"
+                    style={{ color: "#6b7280" }}>Skills</label>
+                  <textarea
+                    name="skills"
+                    value={form.skills}
+                    onChange={handleChange}
+                    placeholder="e.g. Java, React, SQL, Spring Boot"
+                    rows={3}
+                    className="w-full px-3 py-2 text-sm rounded-lg outline-none"
+                    style={{ border: "1px solid #d1d5db", background: "#fafafa", resize: "vertical" }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5"
+                    style={{ color: "#6b7280" }}>Projects</label>
+                  <textarea
+                    name="projects"
+                    value={form.projects}
+                    onChange={handleChange}
+                    placeholder="Describe your projects"
+                    rows={4}
+                    className="w-full px-3 py-2 text-sm rounded-lg outline-none"
+                    style={{ border: "1px solid #d1d5db", background: "#fafafa", resize: "vertical" }}
+                  />
+                </div>
+              </div>
+
+              {/* Email read-only */}
               <div className="mb-2">
-                <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: "#6b7280" }}>
-                  Email address
-                </label>
+                <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5"
+                  style={{ color: "#6b7280" }}>Email Address</label>
                 <input
                   type="email"
                   value={email}
@@ -195,33 +256,62 @@ const ProfilePage = () => {
                   style={{ border: "1px solid #e5e7eb", background: "#f9fafb", color: "#9ca3af" }}
                 />
                 <p className="text-xs mt-1" style={{ color: "#9ca3af" }}>
-                  Email cannot be changed — contact admin if needed.
+                  Email cannot be changed.
                 </p>
               </div>
 
-              {/* Actions */}
-              <div
-                className="flex justify-end gap-3 mt-6 pt-5"
-                style={{ borderTop: "1px solid #f0f2f8" }}
-              >
+              {/* Save / Discard buttons */}
+              <div className="flex justify-end gap-3 mt-6 pt-5"
+                style={{ borderTop: "1px solid #f0f2f8" }}>
                 <button
                   onClick={() => setForm(EMPTY)}
                   className="h-9 px-4 text-sm rounded-lg font-medium transition-all"
                   style={{ border: "1px solid #d1d5db", color: "#6b7280", background: "transparent" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#f9fafb")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
                   Discard
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="h-9 px-5 text-sm rounded-lg font-medium text-white transition-all"
+                  className="h-9 px-5 text-sm rounded-lg font-medium text-white"
                   style={{ background: saving ? "#93aef0" : "#4c7ef0", border: "none" }}
                 >
-                  {saving ? "Saving..." : "Save details"}
+                  {saving ? "Saving..." : "Save Profile"}
                 </button>
               </div>
+
+              {/* Resume Upload */}
+              <div style={{ marginTop: "40px", borderTop: "1px solid #e5e7eb", paddingTop: "24px" }}>
+                <p className="text-xs font-semibold uppercase tracking-wide mb-1"
+                  style={{ color: "#9ca3af" }}>Resume</p>
+                <h2 className="text-base font-semibold mb-1" style={{ color: "#111827" }}>
+                  Upload Resume
+                </h2>
+                <p className="text-sm mb-4" style={{ color: "#6b7280" }}>
+                  Upload your resume in PDF format.
+                </p>
+                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={(e) => setResumeFile(e.target.files[0])}
+                    className="border p-2 rounded text-sm"
+                  />
+                  <button
+                    onClick={handleResumeUpload}
+                    className="h-9 px-4 text-sm rounded-lg font-medium text-white"
+                    style={{ background: "#374151", border: "none" }}
+                  >
+                    Upload
+                  </button>
+                </div>
+                {resumeFile && (
+                  <p className="text-xs mt-2" style={{ color: "#374151" }}>
+                    Selected: {resumeFile.name}
+                  </p>
+                )}
+              </div>
+
             </>
           )}
         </div>

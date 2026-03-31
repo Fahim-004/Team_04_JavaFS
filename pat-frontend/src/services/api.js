@@ -27,12 +27,12 @@ api.interceptors.response.use(
   }
 );
 
-// ── Student Profile ───────────────────────────────────────────
-export const getStudentProfile  = ()     => api.get("/student/profile");
-export const savePersonalDetails = (data) => api.put("/student/profile", data);
-export const saveAcademicDetails = (data) => api.put("/student/academic", data);
+// ── students Profile ───────────────────────────────────────────
+export const getStudentProfile  = ()     => api.get("/students/profile");
+export const savePersonalDetails = (data) => api.put("/students/profile", data);
+export const saveAcademicDetails = (data) => api.put("/students/academic", data);
 
 // ── Dashboard ─────────────────────────────────────────────────
-export const getDashboardStats  = ()     => api.get("/student/dashboard/stats");
+export const getDashboardStats  = ()     => api.get("/students/dashboard/stats");
 
 export default api;
