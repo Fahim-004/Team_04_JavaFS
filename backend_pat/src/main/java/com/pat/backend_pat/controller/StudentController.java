@@ -60,6 +60,8 @@ public class StudentController {
         }
     }
 
+    
+    
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(
             @Valid @RequestBody StudentProfileDTO dto) {
