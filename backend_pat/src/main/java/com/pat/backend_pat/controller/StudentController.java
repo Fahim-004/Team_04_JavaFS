@@ -104,6 +104,7 @@ public class StudentController {
                     .body(ex.getMessage());
         }
     }
+    
     @GetMapping("/resumes")
     public ResponseEntity<?> getResumes() {
 
