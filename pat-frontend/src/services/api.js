@@ -1,28 +1,38 @@
-export const loginUser = async (email, password) => {
+import axios from "axios";
 
-  try {
+const api = axios.create({
+  baseURL: "http://localhost:8080/api/v1",
+  headers: { "Content-Type": "application/json" },
+});
 
-    const response = await fetch("http://localhost:8080/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email: email,
-        password: password
-      })
-    });
+// Attach JWT token automatically to every request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Login failed");
+// On 401 → clear storage and redirect to login
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("userName");
+      window.location.href = "/login";
     }
-
-    return data;
-
-  } catch (error) {
-    throw error;
+    return Promise.reject(err);
   }
+);
 
-};
+// ── Student Profile ───────────────────────────────────────────
+export const getStudentProfile  = ()     => api.get("/student/profile");
+export const savePersonalDetails = (data) => api.put("/student/profile", data);
+export const saveAcademicDetails = (data) => api.put("/student/academic", data);
+
+// ── Dashboard ─────────────────────────────────────────────────
+export const getDashboardStats  = ()     => api.get("/student/dashboard/stats");
+
+export default api;

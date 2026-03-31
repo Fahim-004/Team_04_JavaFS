@@ -3,17 +3,14 @@ import DashboardNavbar from "../components/DashboardNavbar/DashboardNavbar";
 
 const DashboardLayout = ({ children, title }) => {
   return (
-    <div className="flex min-h-screen bg-gray-100">
-
+    <div className="flex min-h-screen" style={{ background: "#f0f2f8" }}>
       <Sidebar />
-
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <DashboardNavbar title={title} />
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 px-8 py-7 overflow-y-auto">
           {children}
         </main>
       </div>
-
     </div>
   );
 };

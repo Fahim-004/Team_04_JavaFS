@@ -1,8 +1,4 @@
 const DashboardNavbar = ({ title }) => {
-
-  const profile = JSON.parse(localStorage.getItem("profile")) || {};
-  const userName = profile.name || "Student";
-
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
@@ -10,15 +6,20 @@ const DashboardNavbar = ({ title }) => {
     return "Good evening";
   };
 
+  const userName = localStorage.getItem("userName") || "Student";
+
   return (
-    <div className="flex items-center justify-between px-6 py-4 bg-white border-b">
-      <h2 className="text-lg font-semibold text-gray-700">
+    <div
+      className="flex items-center justify-between px-8 py-4"
+      style={{ background: "#ffffff", borderBottom: "1px solid #e5e7f0" }}
+    >
+      <span className="text-sm font-medium" style={{ color: "#9ca3af" }}>
         {title || "Dashboard"}
-      </h2>
-      <div className="text-sm text-gray-500">
+      </span>
+      <span className="text-sm" style={{ color: "#6b7280" }}>
         {getGreeting()},{" "}
-        <span className="font-medium text-gray-700">{userName}</span> 👋
-      </div>
+        <span className="font-semibold" style={{ color: "#111827" }}>{userName}</span> 👋
+      </span>
     </div>
   );
 };
