@@ -30,7 +30,16 @@ api.interceptors.response.use(
 // ── students Profile ───────────────────────────────────────────
 export const getStudentProfile  = ()     => api.get("/students/profile");
 export const savePersonalDetails = (data) => api.put("/students/profile", data);
+
 export const saveAcademicDetails = (data) => api.put("/students/academic", data);
+// ── Resume Upload ──────────────────────────────────────────────
+export const uploadResume = (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  return api.post("/students/resume", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
 
 // ── Dashboard ─────────────────────────────────────────────────
 export const getDashboardStats  = ()     => api.get("/students/dashboard/stats");

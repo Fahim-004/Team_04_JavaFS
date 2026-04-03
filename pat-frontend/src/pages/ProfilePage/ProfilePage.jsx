@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
-import { getStudentProfile, savePersonalDetails } from "../../services/api";
+import { getStudentProfile, savePersonalDetails, uploadResume } from "../../services/api";
 
 const EMPTY = {
   fullName: "",
@@ -113,14 +113,23 @@ const ProfilePage = () => {
     }
   };
 
-  const handleResumeUpload = () => {
-    if (resumeFile) {
-      console.log("Resume file selected:", resumeFile.name);
-      alert("Resume upload will be wired tomorrow. File selected: " + resumeFile.name);
-    } else {
-      alert("Please select a PDF file first.");
-    }
-  };
+const handleResumeUpload = async () => {
+  if (!resumeFile) {
+    showToast("error", "Please select a PDF file first.");
+    return;
+  }
+
+  try {
+    await uploadResume(resumeFile);        // This calls the real multipart endpoint
+    showToast("success", "Resume uploaded successfully!");
+    setResumeFile(null);
+
+    // Optional: refresh the profile or show uploaded resumes list later
+  } catch (err) {
+    console.error(err);
+    showToast("error", "Resume upload failed. Please try again.");
+  }
+};
 
   const showToast = (type, msg) => {
     setToast({ type, msg });

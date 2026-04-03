@@ -9,6 +9,7 @@ import com.pat.backend_pat.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +21,7 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final ResumeRepository resumeRepository;
     private final UserRepository userRepository;
+    private final FileStorageService fileStorageService;
 
     // ✅ 1. Get Profile
     @Transactional
@@ -54,10 +56,12 @@ public class StudentService {
 
     // ✅ 3. Upload Resume
     @Transactional
-    public Resume uploadResume(Integer userId, String filePath) {
-
+    public Resume uploadResume(Integer userId, MultipartFile file) {
         Student student = studentRepository.findByUserUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Student profile not found"));
+
+        // Store file (stub for now)
+        String filePath = fileStorageService.storeFile(file);
 
         Resume resume = new Resume();
         resume.setStudent(student);
@@ -75,6 +79,6 @@ public class StudentService {
         Student student = studentRepository.findByUserUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Student profile not found"));
 
-        return resumeRepository.findByStudentStudentId(student.getStudentId());
+        return resumeRepository.findByStudent_StudentId(student.getStudentId());
     }
 }

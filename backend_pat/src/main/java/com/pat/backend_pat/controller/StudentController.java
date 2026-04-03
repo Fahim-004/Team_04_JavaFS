@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
@@ -83,25 +83,21 @@ public class StudentController {
         }
     }
     @PostMapping("/resume")
-    public ResponseEntity<?> uploadResume(
-            @RequestParam String filePath) {
+    public ResponseEntity<?> uploadResume(@RequestParam("file") MultipartFile file) {   // ← Changed to MultipartFile
 
         try {
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body("File is empty");
+            }
 
             Integer userId = getCurrentUserId();
 
-            Resume resume =
-                    studentService.uploadResume(userId, filePath);
+            Resume resume = studentService.uploadResume(userId, file);   // ← Now passes real file
 
-            return ResponseEntity
-                    .status(201)
-                    .body(resume);
+            return ResponseEntity.status(201).body(resume);
 
         } catch (RuntimeException ex) {
-
-            return ResponseEntity
-                    .badRequest()
-                    .body(ex.getMessage());
+            return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
     @GetMapping("/resumes")
