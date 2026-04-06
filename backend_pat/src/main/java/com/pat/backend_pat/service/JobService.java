@@ -1,5 +1,6 @@
 package com.pat.backend_pat.service;
 
+
 import com.pat.backend_pat.entity.Application;
 import com.pat.backend_pat.entity.Job;
 import com.pat.backend_pat.repository.ApplicationRepository;
