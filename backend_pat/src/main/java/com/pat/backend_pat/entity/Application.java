@@ -1,9 +1,8 @@
 package com.pat.backend_pat.entity;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "applications")
@@ -11,8 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Application {
-
-    // Primary Key
+	// Primary Key
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "application_id")
@@ -20,32 +18,32 @@ public class Application {
 
     // Many Applications → One Student
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = false)
+    @JoinColumn(name = "student_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Student student;
 
     // Many Applications → One Job
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_id", nullable = false)
+    @JoinColumn(name = "job_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Job job;
 
     // Many Applications → One Resume
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "resume_id", nullable = false)
+    @JoinColumn(name = "resume_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Resume resume;
 
-    // Application Status using Enum
+    // Application Status
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private ApplicationStatus status = ApplicationStatus.Applied;
+    @Column(name = "status")
+    private ApplicationStatus status;
 
     // Timestamp handled by DB
-    @Column(name = "applied_at", nullable = false, insertable = false, updatable = false)
+    @Column(name = "applied_at", insertable = false, updatable = false)
     private LocalDateTime appliedAt;
 
     // ENUM for status
@@ -58,4 +56,5 @@ public class Application {
         Rejected
     }
 }
+
 

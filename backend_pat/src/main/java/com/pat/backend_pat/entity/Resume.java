@@ -18,7 +18,7 @@ public class Resume {
     private Integer resumeId;
 
     // Many resumes → one student
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
