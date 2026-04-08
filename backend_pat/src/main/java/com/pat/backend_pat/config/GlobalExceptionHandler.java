@@ -6,6 +6,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import jakarta.validation.ValidationException;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +29,11 @@ public class GlobalExceptionHandler {
         response.put("errors", errors);
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<Map<String, String>> handleValidationException(ValidationException ex) {
+        return ResponseEntity.badRequest()
+            .body(Map.of("error", ex.getMessage()));
     }
 
     @ExceptionHandler(RuntimeException.class)
