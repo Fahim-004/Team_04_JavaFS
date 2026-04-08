@@ -44,4 +44,27 @@ export const uploadResume = (file) => {
 // ── Dashboard ─────────────────────────────────────────────────
 export const getDashboardStats  = ()     => api.get("/students/dashboard/stats");
 
+// ── Jobs ──────────────────────────────────────────────────────
+export const getAllJobs = (branch, minCgpa) => {
+  const params = {};
+  if (branch) params.branch = branch;
+  if (minCgpa) params.minCgpa = minCgpa;
+  return api.get("/jobs", { params });
+};
+
+export const getJobById = (jobId) => api.get(`/jobs/${jobId}`);
+
+export const applyForJob = (jobId, resumeId) =>
+  api.post(`/jobs/${jobId}/apply`, { resumeId });
+
+export const getMyApplications = () => api.get("/students/applications");
+
+export const getStudentResumes = () => api.get("/students/resumes");
+
+
+// ── Employer ──────────────────────────────────────────────────
+export const postJob          = (data)   => api.post("/jobs", data);
+export const getEmployerJobs  = ()       => api.get("/employers/jobs");
+export const getJobApplicants = (jobId)  => api.get(`/jobs/${jobId}/applicants`);
+
 export default api;

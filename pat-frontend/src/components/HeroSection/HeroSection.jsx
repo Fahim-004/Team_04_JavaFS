@@ -1,35 +1,59 @@
 import { Link } from "react-router-dom";
+import dashboard from "../../assets/dashboard-preview.png";
 
 const HeroSection = () => {
   return (
-    <div
-      style={{
-        padding: "60px",
-        textAlign: "center",
-        backgroundColor: "#f3f4f6",
-      }}
-    >
-      <h1 style={{ fontSize: "40px", marginBottom: "20px" }}>
-        Placement Automation Tool
-      </h1>
+    <section className="bg-gradient-to-b from-slate-50 to-white py-24">
 
-      <p style={{ fontSize: "18px", marginBottom: "30px" }}>
-        A smart platform for students to track placement drives, apply for
-        companies, and manage their placement journey easily.
-      </p>
+      <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center px-8">
 
-      <Link to="/login">
-        <button style={{ padding: "10px 20px", marginRight: "15px" }}>
-          Login
-        </button>
-      </Link>
+        {/* LEFT SIDE TEXT */}
+        <div>
 
-      <Link to="/register">
-        <button style={{ padding: "10px 20px" }}>
-          Register
-        </button>
-      </Link>
-    </div>
+          <h1 className="text-5xl font-bold text-slate-800 leading-tight">
+            Placement Automation Tool
+          </h1>
+
+          <p className="mt-6 text-lg text-gray-600">
+            Automate and manage the entire campus placement process in one platform.
+            Students can create profiles, track placement drives, upload resumes
+            and monitor their application progress.
+          </p>
+
+          <div className="mt-8 flex gap-4">
+
+            <Link
+              to="/register"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+            >
+              Get Started
+            </Link>
+
+            <Link
+              to="/login"
+              className="border border-gray-300 px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition"
+            >
+              Login
+            </Link>
+
+          </div>
+
+        </div>
+
+        {/* RIGHT SIDE IMAGE */}
+        <div className="flex justify-center">
+
+          <img
+            src={dashboard}
+            alt="Dashboard preview"
+            className="rounded-xl shadow-xl w-full max-w-lg hover:scale-105 transition duration-300 cursor-pointer"
+          />
+
+        </div>
+
+      </div>
+
+    </section>
   );
 };
 

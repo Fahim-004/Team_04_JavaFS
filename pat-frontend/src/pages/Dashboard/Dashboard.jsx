@@ -4,8 +4,8 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import { getDashboardStats } from "../../services/api";
 
 const quickLinks = [
-  { label: "Browse Placement Drives", path: "/drives",       icon: "🏢", desc: "View and apply to open drives",     bg: "#eef2fe" },
-  { label: "My Applications",         path: "/applications", icon: "📋", desc: "Track your application status",     bg: "#eaf3de" },
+  { label: "Browse Placement Drives", path: "/jobs",         icon: "🏢", desc: "View and apply to open drives",     bg: "#eef2fe" },
+  { label: "My Applications",         path: "/my-applications", icon: "📋", desc: "Track your application status",     bg: "#eaf3de" },
   { label: "Academic Details",        path: "/academic",     icon: "🎓", desc: "Keep your academic info updated",   bg: "#faeeda" },
   { label: "Upload Resume",           path: "/resume",       icon: "📄", desc: "Upload or update your resume",     bg: "#eeedfe" },
   { label: "Edit Profile",            path: "/profile",      icon: "👤", desc: "Update your personal details",     bg: "#faece7" },

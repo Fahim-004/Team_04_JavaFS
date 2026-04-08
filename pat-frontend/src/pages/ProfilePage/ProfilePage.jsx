@@ -105,6 +105,7 @@ const ProfilePage = () => {
     setSaving(true);
     try {
       await savePersonalDetails(form);
+      localStorage.setItem("userName", form.fullName);
       showToast("success", "Profile updated successfully!");
     } catch {
       showToast("error", "Failed to save. Please try again.");

@@ -56,7 +56,7 @@ const LoginPage = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 min-h-screen">
 
       {/* Left Branding */}
-      <div className="hidden md:flex items-center justify-center bg-blue-600 text-white p-10">
+      <div className="hidden md:flex items-center justify-center bg-blue-700 text-white p-10">
         <div>
           <h1 className="text-4xl font-bold mb-4">Placement Automation Tool</h1>
           <p className="text-lg">Manage placement drives, upload resumes, and track applications in one platform.</p>

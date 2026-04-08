@@ -1,50 +1,30 @@
-import ProtectedRoute from "../components/ProtectedRoute";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import LandingPage from "../pages/LandingPage/LandingPage";
-import LoginPage from "../pages/LoginPage/LoginPage";
-import RegisterPage from "../pages/RegisterPage/RegisterPage";
-import Dashboard from "../pages/Dashboard/Dashboard";
-import DrivesPage from "../pages/DrivesPage/DrivesPage";
-import ApplicationsPage from "../pages/ApplicationsPage/ApplicationsPage";
-import ResumePage from "../pages/ResumePage/ResumePage";
-import AcademicPage from "../pages/AcademicPage/AcademicPage";
-import ProfilePage from "../pages/ProfilePage/ProfilePage";
-
-const PrivateRoute = ({ children }) => {
-  const { isAuthenticated } = useContext(AuthContext);
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
-};
+import LandingPage        from "../pages/LandingPage/LandingPage";
+import LoginPage          from "../pages/LoginPage/LoginPage";
+import RegisterPage       from "../pages/RegisterPage/RegisterPage";
+import Dashboard          from "../pages/Dashboard/Dashboard";
+import JobListPage        from "../pages/JobListPage/JobListPage";
+import JobDetailPage      from "../pages/JobDetailPage/JobDetailPage";
+import MyApplicationsPage from "../pages/MyApplicationsPage/MyApplicationsPage";
+import ResumePage         from "../pages/ResumePage/ResumePage";
+import AcademicPage       from "../pages/AcademicPage/AcademicPage";
+import ProfilePage        from "../pages/ProfilePage/ProfilePage";
 
 const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
-
-        {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-
-        {/* Protected Routes */}
-<Route
-  path="/dashboard"
-  element={
-    <ProtectedRoute>
-      <Dashboard />
-    </ProtectedRoute>
-  }
-/>        <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
-        <Route path="/drives" element={<PrivateRoute><DrivesPage /></PrivateRoute>} />
-        <Route path="/applications" element={<PrivateRoute><ApplicationsPage /></PrivateRoute>} />
-        <Route path="/resume" element={<PrivateRoute><ResumePage /></PrivateRoute>} />
-        <Route path="/academic" element={<PrivateRoute><AcademicPage /></PrivateRoute>} />
-
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-
+        <Route path="/"               element={<LandingPage />} /> {/*Landing Page*/} 
+        <Route path="/login"          element={<LoginPage />} /> {/*Login Page*/}
+        <Route path="/register"       element={<RegisterPage />} /> {/*Register Page*/}
+        <Route path="/dashboard"      element={<Dashboard />} /> {/*Dashboard Page*/}
+        <Route path="/profile"        element={<ProfilePage />} /> {/*Profile Page*/}
+        <Route path="/resume"         element={<ResumePage />} /> {/*Resume Page*/}
+        <Route path="/academic"       element={<AcademicPage />} /> {/*Academic Page*/}
+        <Route path="/jobs"           element={<JobListPage />} /> {/*Job List Page or Placement Drives Page*/}
+        <Route path="/jobs/:jobId"    element={<JobDetailPage />} /> {/*Job Detail Page*/}
+        <Route path="/my-applications" element={<MyApplicationsPage />} />
       </Routes>
     </BrowserRouter>
   );
