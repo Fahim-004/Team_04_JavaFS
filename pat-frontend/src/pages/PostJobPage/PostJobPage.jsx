@@ -1,7 +1,7 @@
-import DashboardLayout from "../../layouts/DashboardLayout";
 import { useState } from "react";
-import { postJob } from "../../services/api";
 import { useNavigate } from "react-router-dom";
+import DashboardLayout from "../../layouts/DashboardLayout";
+import { postJob } from "../../services/api";
 
 const PostJobPage = () => {
   const navigate = useNavigate();
@@ -19,8 +19,9 @@ const PostJobPage = () => {
     passingYear: "",
   });
 
+  const [errors, setErrors] = useState({});
+  const [bannerError, setBannerError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({
@@ -32,135 +33,260 @@ const PostJobPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setErrors({});
+    setBannerError("");
     setLoading(true);
-    setError("");
 
     try {
       await postJob(formData);
+
       alert("Job posted successfully!");
+
       navigate("/employer/dashboard");
+
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.error || "Failed to post job.");
+
+      const data = err.response?.data;
+
+      if (data?.error) {
+        setBannerError(data.error);
+      }
+
+      if (typeof data === "object") {
+        setErrors(data);
+      }
+
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <DashboardLayout>
-      <h1 className="text-3xl font-bold mb-6">Post New Job</h1>
+    <DashboardLayout title="Post Job">
 
-      <div className="bg-white p-6 rounded-lg shadow max-w-3xl">
-        {error && (
-          <div className="bg-red-100 text-red-600 p-3 rounded mb-4">
-            {error}
+      <div className="max-w-5xl">
+
+        {/* Banner error */}
+        {bannerError && (
+          <div className="mb-4 p-3 rounded-lg bg-red-100 text-red-700 text-sm">
+            {bannerError}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="grid gap-4">
+        <div
+          className="p-6 rounded-xl"
+          style={{ background: "#fff", border: "1px solid #e5e7f0" }}
+        >
 
-          <input
-            name="jobTitle"
-            placeholder="Job Title *"
-            value={formData.jobTitle}
-            onChange={handleChange}
-            className="border p-3 rounded"
-            required
-          />
+          <form onSubmit={handleSubmit} className="space-y-6">
 
-          <input
-            name="salaryPackage"
-            placeholder="Salary Package *"
-            value={formData.salaryPackage}
-            onChange={handleChange}
-            className="border p-3 rounded"
-            required
-          />
+            {/* BASIC INFO */}
+            <div>
+              <h2 className="text-sm font-semibold mb-4 text-gray-700">
+                Basic Information
+              </h2>
 
-          <input
-            type="date"
-            name="applicationDeadline"
-            value={formData.applicationDeadline}
-            onChange={handleChange}
-            className="border p-3 rounded"
-            required
-          />
+              <div className="grid md:grid-cols-2 gap-4">
 
-          <input
-            type="date"
-            name="placementDriveDate"
-            value={formData.placementDriveDate}
-            onChange={handleChange}
-            className="border p-3 rounded"
-            required
-          />
+                <div>
+                  <label className="text-sm font-medium">
+                    Job Title *
+                  </label>
 
-          <textarea
-            name="jobDescription"
-            placeholder="Job Description"
-            value={formData.jobDescription}
-            onChange={handleChange}
-            className="border p-3 rounded"
-          />
+                  <input
+                    type="text"
+                    name="jobTitle"
+                    value={formData.jobTitle}
+                    onChange={handleChange}
+                    className="w-full mt-1 border rounded-lg px-3 py-2"
+                  />
 
-          <input
-            name="jobLocation"
-            placeholder="Job Location"
-            value={formData.jobLocation}
-            onChange={handleChange}
-            className="border p-3 rounded"
-          />
+                  {errors.jobTitle && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.jobTitle}
+                    </p>
+                  )}
+                </div>
 
-          <input
-            name="minCgpa"
-            type="number"
-            step="0.1"
-            min="0"
-            max="10"
-            placeholder="Minimum CGPA"
-            value={formData.minCgpa}
-            onChange={handleChange}
-            className="border p-3 rounded"
-          />
+                <div>
+                  <label className="text-sm font-medium">
+                    Salary Package *
+                  </label>
 
-          <input
-            name="eligibleBranches"
-            placeholder="Eligible Branches (comma separated)"
-            value={formData.eligibleBranches}
-            onChange={handleChange}
-            className="border p-3 rounded"
-          />
+                  <input
+                    type="text"
+                    name="salaryPackage"
+                    value={formData.salaryPackage}
+                    onChange={handleChange}
+                    className="w-full mt-1 border rounded-lg px-3 py-2"
+                  />
 
-          <input
-            name="maxBacklogs"
-            type="number"
-            min="0"
-            placeholder="Max Backlogs"
-            value={formData.maxBacklogs}
-            onChange={handleChange}
-            className="border p-3 rounded"
-          />
+                  {errors.salaryPackage && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.salaryPackage}
+                    </p>
+                  )}
+                </div>
 
-          <input
-            name="passingYear"
-            type="number"
-            placeholder="Passing Year"
-            value={formData.passingYear}
-            onChange={handleChange}
-            className="border p-3 rounded"
-          />
+              </div>
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-          >
-            {loading ? "Posting..." : "Post Job"}
-          </button>
+            {/* DATES */}
+            <div>
+              <h2 className="text-sm font-semibold mb-4 text-gray-700">
+                Important Dates
+              </h2>
 
-        </form>
+              <div className="grid md:grid-cols-2 gap-4">
+
+                <div>
+                  <label className="text-sm font-medium">
+                    Application Deadline *
+                  </label>
+
+                  <input
+                    type="date"
+                    name="applicationDeadline"
+                    value={formData.applicationDeadline}
+                    onChange={handleChange}
+                    className="w-full mt-1 border rounded-lg px-3 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">
+                    Placement Drive Date *
+                  </label>
+
+                  <input
+                    type="date"
+                    name="placementDriveDate"
+                    value={formData.placementDriveDate}
+                    onChange={handleChange}
+                    className="w-full mt-1 border rounded-lg px-3 py-2"
+                  />
+                </div>
+
+              </div>
+            </div>
+
+            {/* JOB DETAILS */}
+            <div>
+              <h2 className="text-sm font-semibold mb-4 text-gray-700">
+                Job Details
+              </h2>
+
+              <div className="grid md:grid-cols-2 gap-4">
+
+                <div>
+                  <label className="text-sm font-medium">
+                    Job Location
+                  </label>
+
+                  <input
+                    type="text"
+                    name="jobLocation"
+                    value={formData.jobLocation}
+                    onChange={handleChange}
+                    className="w-full mt-1 border rounded-lg px-3 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">
+                    Minimum CGPA
+                  </label>
+
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="10"
+                    name="minCgpa"
+                    value={formData.minCgpa}
+                    onChange={handleChange}
+                    className="w-full mt-1 border rounded-lg px-3 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">
+                    Eligible Branches
+                  </label>
+
+                  <input
+                    type="text"
+                    name="eligibleBranches"
+                    value={formData.eligibleBranches}
+                    onChange={handleChange}
+                    placeholder="CSE, ISE"
+                    className="w-full mt-1 border rounded-lg px-3 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">
+                    Max Backlogs
+                  </label>
+
+                  <input
+                    type="number"
+                    min="0"
+                    name="maxBacklogs"
+                    value={formData.maxBacklogs}
+                    onChange={handleChange}
+                    className="w-full mt-1 border rounded-lg px-3 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">
+                    Passing Year
+                  </label>
+
+                  <input
+                    type="number"
+                    name="passingYear"
+                    value={formData.passingYear}
+                    onChange={handleChange}
+                    className="w-full mt-1 border rounded-lg px-3 py-2"
+                  />
+                </div>
+
+              </div>
+
+              <div className="mt-4">
+                <label className="text-sm font-medium">
+                  Job Description
+                </label>
+
+                <textarea
+                  name="jobDescription"
+                  value={formData.jobDescription}
+                  onChange={handleChange}
+                  rows="4"
+                  className="w-full mt-1 border rounded-lg px-3 py-2"
+                />
+              </div>
+            </div>
+
+            {/* SUBMIT */}
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-2 rounded-lg text-white"
+                style={{ background: "#4c7ef0" }}
+              >
+                {loading ? "Posting..." : "Post Job"}
+              </button>
+            </div>
+
+          </form>
+
+        </div>
       </div>
+
     </DashboardLayout>
   );
 };

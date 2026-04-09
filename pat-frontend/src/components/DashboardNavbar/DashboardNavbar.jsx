@@ -9,6 +9,10 @@ const DashboardNavbar = ({ title }) => {
   const { logout }   = useContext(AuthContext);
 
   const userName = localStorage.getItem("userName") || "Student";
+  // it converts Uppercase to lower case
+  const role = localStorage.getItem("role")?.toLowerCase() || "student";
+  // just in case
+  const displayRole = role.charAt(0).toUpperCase() + role.slice(1);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -46,10 +50,7 @@ const DashboardNavbar = ({ title }) => {
 
       {/* Right — welcome text + avatar */}
       <div className="flex items-center gap-4">
-        <span className="text-sm" style={{ color: "#6b7280" }}>
-          Welcome back,{" "}
-          <span className="font-semibold" style={{ color: "#111827" }}>{userName}</span> 👋
-        </span>
+        
 
         {/* Avatar + dropdown */}
         <div style={{ position: "relative" }} ref={dropdownRef}>
@@ -105,13 +106,21 @@ const DashboardNavbar = ({ title }) => {
                   {userName}
                 </p>
                 <p className="text-xs" style={{ color: "#9ca3af", margin: "2px 0 0" }}>
-                  Student
+                  {displayRole}
                 </p>
               </div>
 
               {/* View Profile */}
               <button
-                onClick={() => { setDropdownOpen(false); navigate("/profile"); }}
+                onClick={() => {
+                      setDropdownOpen(false);
+
+                      if (role === "employer") {
+                        navigate("/employer/profile");
+                      } else {
+                        navigate("/profile");
+                      }
+                    }}
                 className="w-full flex items-center gap-3 text-sm"
                 style={{
                   padding:    "10px 16px",

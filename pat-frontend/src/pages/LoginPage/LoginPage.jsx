@@ -39,6 +39,8 @@ const LoginPage = () => {
     }
 
     login(data.token, data.role, data.userId);
+    // store the name returned from backend
+    localStorage.setItem("userName", data.name);
 
     if (data.role === "student") navigate("/dashboard");
     else if (data.role === "employer") navigate("/employer/dashboard");

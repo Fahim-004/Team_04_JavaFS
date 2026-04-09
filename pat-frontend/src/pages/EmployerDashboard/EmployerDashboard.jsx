@@ -1,6 +1,6 @@
-import DashboardLayout from "../../layouts/DashboardLayout";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DashboardLayout from "../../layouts/DashboardLayout";
 import { getEmployerJobs } from "../../services/api";
 
 const EmployerDashboard = () => {
@@ -8,71 +8,122 @@ const EmployerDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const res = await getEmployerJobs();
-        setJobs(res.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchJobs();
+    getEmployerJobs()
+      .then((res) => setJobs(res.data))
+      .catch(() => {});
   }, []);
 
+  const stats = [
+    {
+      label: "Jobs Posted",
+      value: jobs.length,
+      color: "#4c7ef0",
+      sub: "Total jobs created",
+    },
+    {
+      label: "Active Jobs",
+      value: jobs.filter((j) => j.status !== "CLOSED").length,
+      color: "#22a06b",
+      sub: "Currently accepting applications",
+    },
+    {
+      label: "Applicants",
+      value: jobs.reduce((sum, j) => sum + (j.applicantCount || 0), 0),
+      color: "#d97706",
+      sub: "Total applicants",
+    },
+  ];
+
   return (
-    <DashboardLayout>
-      <h1 className="text-3xl font-bold mb-6">Employer Dashboard</h1>
+    <DashboardLayout title="Employer Dashboard">
 
-      <div className="bg-white p-6 rounded-lg shadow max-w-5xl">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">
-            Jobs Posted ({jobs.length})
-          </h2>
-
-          <button
-            onClick={() => navigate("/employer/post-job")}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      {/* Stats cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {stats.map((s) => (
+          <div
+            key={s.label}
+            className="rounded-xl p-5"
+            style={{ background: "#fff", border: "1px solid #e5e7f0" }}
           >
-            Post New Job
-          </button>
-        </div>
+            <p className="text-xs uppercase tracking-wide font-medium mb-2" style={{ color: "#9ca3af" }}>
+              {s.label}
+            </p>
+            <p className="text-4xl font-semibold mb-1" style={{ color: s.color }}>
+              {s.value}
+            </p>
+            <p className="text-xs" style={{ color: "#9ca3af" }}>{s.sub}</p>
+          </div>
+        ))}
+      </div>
 
-        {jobs.length === 0 ? (
-          <p className="text-gray-500">No jobs posted yet.</p>
-        ) : (
-          <table className="w-full border mt-4">
-            <thead className="bg-gray-100">
+      {/* Quick action */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-sm uppercase tracking-wide font-medium" style={{ color: "#9ca3af" }}>
+          Jobs
+        </h2>
+
+        <button
+          onClick={() => navigate("/employer/post-job")}
+          className="px-4 py-2 text-sm rounded-lg"
+          style={{
+            background: "#4c7ef0",
+            color: "#fff",
+            border: "none",
+          }}
+        >
+          + Post New Job
+        </button>
+      </div>
+
+      {/* Jobs table */}
+      <div
+        className="rounded-xl overflow-hidden"
+        style={{ background: "#fff", border: "1px solid #e5e7f0" }}
+      >
+        <table className="w-full text-sm">
+          <thead style={{ background: "#f9fafb" }}>
+            <tr>
+              <th className="text-left px-4 py-3">Job Title</th>
+              <th className="text-left px-4 py-3">Salary</th>
+              <th className="text-left px-4 py-3">Deadline</th>
+              <th className="text-left px-4 py-3">Applicants</th>
+              <th className="text-left px-4 py-3">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {jobs.length === 0 ? (
               <tr>
-                <th className="p-3 text-left border">Job Title</th>
-                <th className="p-3 text-left border">Salary</th>
-                <th className="p-3 text-left border">Deadline</th>
-                <th className="p-3 text-left border">Actions</th>
+                <td colSpan="5" className="text-center py-6 text-gray-400">
+                  No jobs posted yet.
+                </td>
               </tr>
-            </thead>
+            ) : (
+              jobs.map((job) => (
+                <tr key={job.jobId} style={{ borderTop: "1px solid #f3f4f6" }}>
+                  <td className="px-4 py-3">{job.jobTitle}</td>
+                  <td className="px-4 py-3">{job.salaryPackage}</td>
+                  <td className="px-4 py-3">{job.applicationDeadline}</td>
+                  <td className="px-4 py-3">{job.applicantCount || 0}</td>
 
-            <tbody>
-              {jobs.map((job) => (
-                <tr key={job.jobId}>
-                  <td className="p-3 border">{job.jobTitle}</td>
-                  <td className="p-3 border">{job.salaryPackage}</td>
-                  <td className="p-3 border">{job.applicationDeadline}</td>
-                  <td className="p-3 border">
+                  <td className="px-4 py-3">
                     <button
                       onClick={() =>
                         navigate(`/employer/jobs/${job.jobId}/applicants`)
                       }
-                      className="bg-gray-800 text-white px-3 py-1 rounded hover:bg-gray-900"
+                      className="text-sm"
+                      style={{ color: "#4c7ef0" }}
                     >
                       View Applicants
                     </button>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
+
     </DashboardLayout>
   );
 };
