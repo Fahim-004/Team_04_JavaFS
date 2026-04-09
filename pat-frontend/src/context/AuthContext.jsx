@@ -32,6 +32,9 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("userId");
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userName");
+    localStorage.removeItem("profile");
+    localStorage.removeItem("academic");
+    localStorage.removeItem("applications");
   };
 
   return (
