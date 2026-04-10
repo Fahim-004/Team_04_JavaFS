@@ -7,7 +7,7 @@ import DashboardNavbar  from "../components/DashboardNavbar/DashboardNavbar";
 const DashboardLayout = ({ children, title }) => {
   const [collapsed, setCollapsed] = useState(false);
 
-  const role = localStorage.getItem("role");
+  const role = (localStorage.getItem("role") || "").toLowerCase();
 
   return (
     <div className="flex" style={{ height: "100vh", overflow: "hidden", background: "#f0f2f8" }}>

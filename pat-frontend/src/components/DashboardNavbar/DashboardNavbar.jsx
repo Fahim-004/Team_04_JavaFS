@@ -10,9 +10,9 @@ const DashboardNavbar = ({ title }) => {
 
   const userName = localStorage.getItem("userName") || "Student";
   // it converts Uppercase to lower case
-  const role = localStorage.getItem("role")?.toLowerCase() || "student";
+  const role = (localStorage.getItem("role") || "student").toLowerCase();
   // just in case
-  const displayRole = role.charAt(0).toUpperCase() + role.slice(1);
+  const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : "User";
 
   // Close dropdown when clicking outside
   useEffect(() => {

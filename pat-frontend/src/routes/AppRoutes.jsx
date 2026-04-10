@@ -15,6 +15,9 @@ import EmployerDashboard from "../pages/EmployerDashboard/EmployerDashboard";
 import PostJobPage from "../pages/PostJobPage/PostJobPage";
 import ApplicantsPage from "../pages/ApplicantsPage/ApplicantsPage";
 
+import EmployerJobsPage from "../pages/EmployerJobsPage/EmployerJobsPage";
+import EmployerProfilePage from "../pages/EmployerProfilePage/EmployerProfilePage";
+
 const AppRoutes = () => {
   return (
     <BrowserRouter>
@@ -33,6 +36,9 @@ const AppRoutes = () => {
         <Route path="/employer/dashboard" element={<EmployerDashboard />} />
         <Route path="/employer/post-job" element={<PostJobPage />} />
         <Route path="/employer/jobs/:jobId/applicants" element={<ApplicantsPage />} />
+
+        <Route path="/employer/jobs" element={<EmployerJobsPage />} />
+        <Route path="/employer/profile" element={<EmployerProfilePage />} />
       </Routes>
     </BrowserRouter>
   );

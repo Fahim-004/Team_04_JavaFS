@@ -67,4 +67,9 @@ export const postJob          = (data)   => api.post("/jobs", data);
 export const getEmployerJobs  = ()       => api.get("/employers/jobs");
 export const getJobApplicants = (jobId)  => api.get(`/jobs/${jobId}/applicants`);
 
+
+// ── Employer Profile ───────────────────────────────────────────
+export const getEmployerProfile = () => api.get("/employers/profile");
+export const saveEmployerProfile = (data) => api.post("/employers/profile", data);
+
 export default api;

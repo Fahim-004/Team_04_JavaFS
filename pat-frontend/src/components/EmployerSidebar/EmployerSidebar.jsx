@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const employerLinks = [
   { path: "/employer/dashboard", label: "Dashboard", icon: "📊" },
+  { path: "/employer/jobs" , label: "Jobs" , icon: "📃"},
   { path: "/employer/post-job", label: "Post Job", icon: "➕" },
 ];
 
@@ -54,7 +55,9 @@ const EmployerSidebar = ({ collapsed, setCollapsed }) => {
       {/* Links */}
       <nav className="flex-1 py-4 px-2">
         {employerLinks.map((link) => {
-          const isActive = location.pathname === link.path;
+          const isActive = 
+            location.pathname === link.path ||
+            location.pathname.startsWith(link.path + "/");
 
           return (
             <Link
