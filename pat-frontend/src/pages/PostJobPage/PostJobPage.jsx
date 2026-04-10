@@ -2,9 +2,37 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { postJob } from "../../services/api";
+import { useEffect } from "react";
+import { getEmployerProfile } from "../../services/api";
+import { isEmployerProfileComplete } from "../../utils/ProfileUtils";
 
 const PostJobPage = () => {
   const navigate = useNavigate();
+  const [isApproved, setIsApproved] = useState(true);
+  useEffect(() => {
+  const checkProfile = async () => {
+    try {
+      const res = await getEmployerProfile();
+      const profile = res.data;
+
+      const isComplete = isEmployerProfileComplete(profile);
+
+      if (!isComplete) {
+      alert("Please complete your profile before posting a job.");
+      navigate("/employer/profile");
+      return;
+      }
+setIsApproved(profile.approvedStatus);
+
+    } catch (err) {
+      // API failure = treat as incomplete
+      alert("Please complete your profile before posting a job.");
+      navigate("/employer/profile");
+    }
+  };
+
+  checkProfile();
+}, []);
 
   const [formData, setFormData] = useState({
     jobTitle: "",
@@ -72,6 +100,12 @@ const PostJobPage = () => {
             {bannerError}
           </div>
         )}
+        {/* Approval status banner */}
+        {!isApproved && (
+           <div className="mb-4 p-3 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
+                 Your account is pending admin approval. You cannot post jobs until approved.
+             </div>
+            )}
 
         <div
           className="p-6 rounded-xl"
@@ -274,7 +308,7 @@ const PostJobPage = () => {
             <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !isApproved}
                 className="px-6 py-2 rounded-lg text-white"
                 style={{ background: "#4c7ef0" }}
               >
