@@ -105,6 +105,25 @@ public class StudentController {
                     .body(ex.getMessage());
         }
     }
+    @GetMapping("/academic")
+    public ResponseEntity<?> getAcademic() {
+
+        try {
+
+            Integer userId = getCurrentUserId();
+
+            StudentAcademic academic =
+                    studentService.getAcademic(userId);
+
+            return ResponseEntity.ok(academic);
+
+        } catch (RuntimeException ex) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(ex.getMessage());
+        }
+    }
     @PostMapping("/resume")
     public ResponseEntity<?> uploadResume(@RequestParam("file") MultipartFile file) {   // ← Changed to MultipartFile
 

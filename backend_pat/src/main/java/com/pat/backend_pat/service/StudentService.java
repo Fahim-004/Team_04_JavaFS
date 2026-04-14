@@ -107,4 +107,13 @@ public class StudentService {
 
         return studentAcademicRepository.save(academic);
     }
+    public StudentAcademic getAcademic(Integer userId) {
+
+        Student student = studentRepository.findByUserUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        return studentAcademicRepository
+                .findByStudentStudentId(student.getStudentId())
+                .orElseThrow(() -> new RuntimeException("Academic details not found"));
+    }
 }
