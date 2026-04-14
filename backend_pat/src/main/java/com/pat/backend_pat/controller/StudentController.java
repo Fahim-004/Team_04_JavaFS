@@ -1,11 +1,13 @@
 package com.pat.backend_pat.controller;
 
 import com.pat.backend_pat.dto.StudentProfileDTO;
+import com.pat.backend_pat.entity.StudentAcademic;
 import com.pat.backend_pat.entity.Resume;
 import com.pat.backend_pat.entity.Student;
 import com.pat.backend_pat.entity.User;
 import com.pat.backend_pat.repository.UserRepository;
 import com.pat.backend_pat.service.StudentService;
+import com.pat.backend_pat.dto.StudentAcademicDTO;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -74,6 +76,27 @@ public class StudentController {
                     studentService.updateProfile(userId, dto);
 
             return ResponseEntity.ok(updatedStudent);
+
+        } catch (RuntimeException ex) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(ex.getMessage());
+        }
+        
+    }
+    @PutMapping("/academic")
+    public ResponseEntity<?> updateAcademic(
+            @Valid @RequestBody StudentAcademicDTO dto) {
+
+        try {
+
+            Integer userId = getCurrentUserId();
+
+            StudentAcademic updatedAcademic =
+                    studentService.updateAcademic(userId, dto);
+
+            return ResponseEntity.ok(updatedAcademic);
 
         } catch (RuntimeException ex) {
 

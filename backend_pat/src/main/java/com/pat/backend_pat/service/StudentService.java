@@ -1,5 +1,8 @@
 package com.pat.backend_pat.service;
 
+import com.pat.backend_pat.dto.StudentAcademicDTO;
+import com.pat.backend_pat.entity.StudentAcademic;
+import com.pat.backend_pat.repository.StudentAcademicRepository;
 import com.pat.backend_pat.dto.StudentProfileDTO;
 import com.pat.backend_pat.entity.Resume;
 import com.pat.backend_pat.entity.Student;
@@ -8,8 +11,11 @@ import com.pat.backend_pat.repository.StudentRepository;
 import com.pat.backend_pat.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -80,5 +86,25 @@ public class StudentService {
                 .orElseThrow(() -> new RuntimeException("Student profile not found"));
 
         return resumeRepository.findByStudent_StudentId(student.getStudentId());
+    }
+    @Autowired
+    private StudentAcademicRepository studentAcademicRepository;
+    public StudentAcademic updateAcademic(Integer userId, StudentAcademicDTO dto) {
+
+        Student student = studentRepository.findByUserUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        StudentAcademic academic = studentAcademicRepository
+                .findByStudentStudentId(student.getStudentId())
+                .orElse(new StudentAcademic());
+
+        academic.setStudent(student);
+        academic.setDegree(dto.getDegree());
+        academic.setTenth(dto.getTenth());
+        academic.setTwelfth(dto.getTwelfth());
+        academic.setSemester(dto.getSemester());
+        academic.setCertifications(dto.getCertifications());
+
+        return studentAcademicRepository.save(academic);
     }
 }

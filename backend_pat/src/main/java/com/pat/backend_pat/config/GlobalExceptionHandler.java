@@ -48,8 +48,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleException(Exception ex) {
 
+        ex.printStackTrace(); // This shows full error in console
+
         Map<String, Object> response = new HashMap<>();
-        response.put("error", "An unexpected error occurred");
+        response.put("error", ex.getMessage()); // Send real error
 
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
