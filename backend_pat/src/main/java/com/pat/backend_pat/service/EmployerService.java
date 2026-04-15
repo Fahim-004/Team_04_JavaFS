@@ -4,17 +4,11 @@ import com.pat.backend_pat.dto.CreateJobDTO;
 import com.pat.backend_pat.dto.EmployerProfileDTO;
 import com.pat.backend_pat.entity.Employer;
 import com.pat.backend_pat.entity.Job;
-<<<<<<< HEAD
-import com.pat.backend_pat.exception.ValidationException;
-import com.pat.backend_pat.repository.EmployerRepository;
-import com.pat.backend_pat.repository.JobRepository;
-=======
 import com.pat.backend_pat.entity.User;
 import com.pat.backend_pat.exception.ValidationException;
 import com.pat.backend_pat.repository.EmployerRepository;
 import com.pat.backend_pat.repository.JobRepository;
 import com.pat.backend_pat.repository.UserRepository;
->>>>>>> 81be807547e14ba5cd858be832b8fe958d35de09
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,11 +23,9 @@ public class EmployerService {
 
     @Autowired
     private JobRepository jobRepository;
-
     
     @Autowired
     private UserRepository userRepository;
-
 
     @Autowired
     private JobValidationService jobValidationService;
@@ -113,8 +105,6 @@ public class EmployerService {
     public List<Job> getEmployerJobs(Integer userId) {
 
         Employer employer = employerRepository.findByUserUserId(userId)
-
-           
         		.orElseThrow(() -> new ValidationException("Employer profile not found"));
         return jobRepository.findByEmployer(employer);
     }
@@ -144,6 +134,5 @@ public class EmployerService {
         return getEmployerJobs(user.getUserId());
     }
 }
-
 
 
