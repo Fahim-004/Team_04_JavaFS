@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
-import { getStudentProfile, saveAcademicDetails } from "../../services/api";
+import { getStudentProfile, saveAcademicDetails, getAcademicDetails } from "../../services/api";
 
 const EMPTY = {
   degree: "", branch: "", usn: "", semester: "",
@@ -127,29 +127,43 @@ const AcademicPage = () => {
   const [toast, setToast]     = useState(null);
 
   useEffect(() => {
-    getStudentProfile()
-      .then((res) => {
-        if (res.data) {
-          const d = res.data;
-          setForm({
-            degree:         d.degree        || "",
-            branch:         d.branch        || "",
-            usn:            d.usn           || "",
-            semester:       d.semester      || "",
-            cgpa:           d.cgpa          || "",
-            backlogCount:   d.backlogCount  || "",
-            tenth:          d.tenth         || "",
-            twelfth:        d.twelfth       || "",
-            passingYear:    d.passingYear   || "",
-            skills:         d.skills        || "",
-            projects:       d.projects      || "",
-            certifications: d.certifications || "",
-          });
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const fetchData = async () => {
+    try {
+      const [profileRes, academicRes] = await Promise.all([
+        getStudentProfile(),
+        getAcademicDetails(),
+      ]);
+
+      const p = profileRes.data || {};
+      const a = academicRes.data || {};
+
+      setForm({
+        // 🔹 From STUDENT table
+        branch: p.branch || "",
+        usn: p.usn || "",
+        cgpa: p.cgpa || "",
+        backlogCount: p.backlogCount || "",
+        passingYear: p.passingYear || "",
+        skills: p.skills || "",
+        projects: p.projects || "",
+
+        // 🔹 From ACADEMIC table
+        degree: a.degree || "",
+        tenth: a.tenth || "",
+        twelfth: a.twelfth || "",
+        semester: a.semester || "",
+        certifications: a.certifications || "",
+      });
+
+    } catch (err) {
+      console.log("Error fetching academic data", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));

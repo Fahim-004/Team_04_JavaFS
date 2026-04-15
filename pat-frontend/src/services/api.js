@@ -72,4 +72,9 @@ export const getJobApplicants = (jobId)  => api.get(`/jobs/${jobId}/applicants`)
 export const getEmployerProfile = () => api.get("/employers/profile");
 export const saveEmployerProfile = (data) => api.post("/employers/profile", data);
 
+// ── Academic Details ───────────────────────────────────────────
+export const getAcademicDetails = () => {
+  return axios.get("/students/academic");
+};
+
 export default api;
