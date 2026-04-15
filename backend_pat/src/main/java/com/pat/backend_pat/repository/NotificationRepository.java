@@ -1,10 +1,11 @@
 package com.pat.backend_pat.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import com.pat.backend_pat.entity.Notification;
+import com.pat.backend_pat.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 
-@Repository
 public interface NotificationRepository extends JpaRepository<Notification, Integer> {
 
+    List<Notification> findByUserOrderByCreatedAtDesc(User user);
 }

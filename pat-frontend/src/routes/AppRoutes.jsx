@@ -11,6 +11,13 @@ import ResumePage         from "../pages/ResumePage/ResumePage";
 import AcademicPage       from "../pages/AcademicPage/AcademicPage";
 import ProfilePage        from "../pages/ProfilePage/ProfilePage";
 
+import EmployerDashboard from "../pages/EmployerDashboard/EmployerDashboard";
+import PostJobPage from "../pages/PostJobPage/PostJobPage";
+import ApplicantsPage from "../pages/ApplicantsPage/ApplicantsPage";
+
+import EmployerJobsPage from "../pages/EmployerJobsPage/EmployerJobsPage";
+import EmployerProfilePage from "../pages/EmployerProfilePage/EmployerProfilePage";
+
 const AppRoutes = () => {
   return (
     <BrowserRouter>
@@ -25,6 +32,13 @@ const AppRoutes = () => {
         <Route path="/jobs"           element={<JobListPage />} /> {/*Job List Page or Placement Drives Page*/}
         <Route path="/jobs/:jobId"    element={<JobDetailPage />} /> {/*Job Detail Page*/}
         <Route path="/my-applications" element={<MyApplicationsPage />} />
+
+        <Route path="/employer/dashboard" element={<EmployerDashboard />} />
+        <Route path="/employer/post-job" element={<PostJobPage />} />
+        <Route path="/employer/jobs/:jobId/applicants" element={<ApplicantsPage />} />
+
+        <Route path="/employer/jobs" element={<EmployerJobsPage />} />
+        <Route path="/employer/profile" element={<EmployerProfilePage />} />
       </Routes>
     </BrowserRouter>
   );

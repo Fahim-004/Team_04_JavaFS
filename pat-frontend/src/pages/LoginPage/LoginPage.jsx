@@ -39,6 +39,8 @@ const LoginPage = () => {
     }
 
     login(data.token, data.role, data.userId);
+    // store the name returned from backend
+    localStorage.setItem("userName", data.name);
 
     if (data.role === "student") navigate("/dashboard");
     else if (data.role === "employer") navigate("/employer/dashboard");
@@ -67,7 +69,7 @@ const LoginPage = () => {
       <div className="flex items-center justify-center bg-gray-100 min-h-screen">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
 
-          <h2 className="text-2xl font-bold text-center mb-6">Student Login</h2>
+          <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
 
           {error && (
             <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4 text-sm">

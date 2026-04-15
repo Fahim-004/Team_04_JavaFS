@@ -35,7 +35,7 @@ public class AuthService {
         User user = new User();
         user.setEmail(request.getEmail());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setRole(User.Role.valueOf(request.getRole()));
+        user.setRole(User.Role.valueOf(request.getRole().toUpperCase()));
 
         User savedUser = userRepository.save(user);
 
@@ -54,14 +54,14 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(savedUser.getEmail(), savedUser.getRole().name());
 
-        return new AuthResponse(token, savedUser.getRole().name(), savedUser.getUserId());
+        return new AuthResponse(token, savedUser.getRole().name(), savedUser.getUserId(), "");
     }
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!passwordEncoder.matches(
                 request.getPassword(), user.getPasswordHash())) {
@@ -70,6 +70,35 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
 
-        return new AuthResponse(token, user.getRole().name(), user.getUserId());
+        String name = "";
+
+        // If user is student → get fullName
+        if (user.getRole() == User.Role.student) {
+            Student student = studentRepository
+                .findByUserUserId(user.getUserId())
+                .orElse(null);
+
+            if (student != null) {
+                name = student.getFullName();
+            }
+        }
+
+        // If user is employer → get companyName
+        if (user.getRole() == User.Role.employer) {
+            Employer employer = employerRepository
+                .findByUserUserId(user.getUserId())
+                .orElse(null);
+
+            if (employer != null) {
+                name = employer.getCompanyName();
+            }
+        }
+
+        return new AuthResponse(
+            token,
+            user.getRole().name(),
+            user.getUserId(),
+            name
+        );
     }
 }
