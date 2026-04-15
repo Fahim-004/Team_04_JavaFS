@@ -25,6 +25,7 @@ const DashboardLayout = ({ children, title }) => {
           {children}
         </main>
       </div>
+
     </div>
   );
 };

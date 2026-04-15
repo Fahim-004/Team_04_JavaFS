@@ -1,18 +1,20 @@
 package com.pat.backend_pat.controller;
 
 import com.pat.backend_pat.dto.StudentProfileDTO;
+import com.pat.backend_pat.entity.StudentAcademic;
 import com.pat.backend_pat.entity.Resume;
 import com.pat.backend_pat.entity.Student;
 import com.pat.backend_pat.entity.User;
 import com.pat.backend_pat.repository.UserRepository;
 import com.pat.backend_pat.service.StudentService;
+import com.pat.backend_pat.dto.StudentAcademicDTO;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
@@ -81,25 +83,70 @@ public class StudentController {
                     .badRequest()
                     .body(ex.getMessage());
         }
+        
     }
-    @PostMapping("/resume")
-    public ResponseEntity<?> uploadResume(@RequestParam("file") MultipartFile file) {   // ← Changed to MultipartFile
+    @PutMapping("/academic")
+    public ResponseEntity<?> updateAcademic(
+            @Valid @RequestBody StudentAcademicDTO dto) {
 
         try {
-            if (file.isEmpty()) {
-                return ResponseEntity.badRequest().body("File is empty");
-            }
 
             Integer userId = getCurrentUserId();
 
-            Resume resume = studentService.uploadResume(userId, file);   // ← Now passes real file
+            StudentAcademic updatedAcademic =
+                    studentService.updateAcademic(userId, dto);
 
-            return ResponseEntity.status(201).body(resume);
+            return ResponseEntity.ok(updatedAcademic);
 
         } catch (RuntimeException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(ex.getMessage());
         }
     }
+    @GetMapping("/academic")
+    public ResponseEntity<?> getAcademic() {
+
+        try {
+
+            Integer userId = getCurrentUserId();
+
+            StudentAcademic academic =
+                    studentService.getAcademic(userId);
+
+            return ResponseEntity.ok(academic);
+
+        } catch (RuntimeException ex) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(ex.getMessage());
+        }
+    }
+    @PostMapping("/resume")
+    public ResponseEntity<?> uploadResume(
+            @RequestParam String filePath) {
+
+        try {
+
+            Integer userId = getCurrentUserId();
+
+            Resume resume =
+                    studentService.uploadResume(userId, filePath);
+
+            return ResponseEntity
+                    .status(201)
+                    .body(resume);
+
+        } catch (RuntimeException ex) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(ex.getMessage());
+        }
+    }
+    
     @GetMapping("/resumes")
     public ResponseEntity<?> getResumes() {
 
