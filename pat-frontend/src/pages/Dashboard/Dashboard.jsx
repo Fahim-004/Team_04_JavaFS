@@ -10,6 +10,8 @@ const quickLinks = [
 ];
 
 const Dashboard = () => {
+  const userName = localStorage.getItem("userName") ?? "Student";
+  const [stats, setStats] = useState({ availableDrives: 0, myApplications: 0, upcomingInterviews: 0 });
 
   const profile = JSON.parse(localStorage.getItem("profile")) || {};
   const userName = profile.name || "Student";

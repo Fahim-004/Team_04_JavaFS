@@ -24,8 +24,10 @@ public class EmployerController {
             Authentication auth,
             @Valid @RequestBody EmployerProfileDTO dto
     ) {
-        Integer userId = (Integer) auth.getDetails();
-        return ResponseEntity.ok(employerService.updateProfile(userId, dto));
+
+    	String email = auth.getName();
+    	return ResponseEntity.ok(employerService.updateProfileByEmail(email, dto));
+
     }
 
     // ================= POST JOB =================
@@ -34,14 +36,22 @@ public class EmployerController {
             Authentication auth,
             @Valid @RequestBody CreateJobDTO dto
     ) {
-        Integer userId = (Integer) auth.getDetails();
-        return ResponseEntity.status(201).body(employerService.postJob(userId, dto));
+
+    	String email = auth.getName();
+    	return ResponseEntity.status(201).body(employerService.postJobByEmail(email, dto));
     }
 
     // ================= GET EMPLOYER JOBS =================
     @GetMapping("/employers/jobs")
     public ResponseEntity<?> getEmployerJobs(Authentication auth) {
-        Integer userId = (Integer) auth.getDetails();
-        return ResponseEntity.ok(employerService.getEmployerJobs(userId));
+
+    	String email = auth.getName();
+    	return ResponseEntity.ok(employerService.getEmployerJobsByEmail(email));
+    }
+    @GetMapping("/employers/profile")
+    public ResponseEntity<?> getProfile(Authentication auth) {
+    	String email = auth.getName();
+    	return ResponseEntity.ok(employerService.getProfileByEmail(email));
+
     }
 }

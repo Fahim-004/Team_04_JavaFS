@@ -4,9 +4,11 @@ import com.pat.backend_pat.dto.CreateJobDTO;
 import com.pat.backend_pat.dto.EmployerProfileDTO;
 import com.pat.backend_pat.entity.Employer;
 import com.pat.backend_pat.entity.Job;
+import com.pat.backend_pat.entity.User;
 import com.pat.backend_pat.exception.ValidationException;
 import com.pat.backend_pat.repository.EmployerRepository;
 import com.pat.backend_pat.repository.JobRepository;
+import com.pat.backend_pat.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,9 @@ public class EmployerService {
 
     @Autowired
     private JobRepository jobRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private JobValidationService jobValidationService;
@@ -34,14 +39,23 @@ public class EmployerService {
     @Transactional
     public Employer getProfile(Integer userId) {
         return employerRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Employer profile not found"));
+        		.orElseThrow(() -> new ValidationException("Employer profile not found"));
     }
 
     @Transactional
     public Employer updateProfile(Integer userId, EmployerProfileDTO dto) {
 
-        Employer employer = employerRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Employer profile not found"));
+    	Employer employer = employerRepository.findByUserUserId(userId)
+    		    .orElseGet(() -> {
+    		        Employer newEmployer = new Employer();
+
+    		        // Fetch User entity
+    		        User user = userRepository.findById(userId)
+    		                .orElseThrow(() -> new RuntimeException("User not found"));
+
+    		        newEmployer.setUser(user);
+    		        return newEmployer;
+    		    });
 
         employer.setCompanyName(dto.getCompanyName());
         employer.setCompanyDescription(dto.getCompanyDescription());
@@ -91,8 +105,34 @@ public class EmployerService {
     public List<Job> getEmployerJobs(Integer userId) {
 
         Employer employer = employerRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Employer not found"));
-
+        		.orElseThrow(() -> new ValidationException("Employer profile not found"));
         return jobRepository.findByEmployer(employer);
     }
+    
+    public Employer getProfileByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return getProfile(user.getUserId());
+    }
+    public Employer updateProfileByEmail(String email, EmployerProfileDTO dto) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return updateProfile(user.getUserId(), dto);
+    }
+    public Job postJobByEmail(String email, CreateJobDTO dto) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return postJob(user.getUserId(), dto);
+    }
+    public List<Job> getEmployerJobsByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return getEmployerJobs(user.getUserId());
+    }
 }
+
+
