@@ -2,7 +2,7 @@ package com.pat.backend_pat.service;
 
 import com.pat.backend_pat.dto.StatisticsDTO;
 import com.pat.backend_pat.entity.Employer;
-import com.pat.backend_pat.entity.Student;
+import com.pat.backend_pat.entity.*;
 import com.pat.backend_pat.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,7 +44,7 @@ public class AdminService {
         int totalEmployers    = (int) employerRepository.count();
         int totalJobs         = (int) jobRepository.count();
         int totalApplications = (int) applicationRepository.count();
-        int totalSelected     = applicationRepository.countByStatus("Selected");
+        int totalSelected     = applicationRepository.countByStatus(Application.ApplicationStatus.Selected);
         return new StatisticsDTO(totalStudents, totalEmployers,
             totalJobs, totalApplications, totalSelected);
     }

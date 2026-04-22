@@ -14,4 +14,5 @@ public interface ApplicationRepository extends JpaRepository<Application, Intege
     List<Application> findByJob(Job job);
 
     Optional<Application> findByStudentAndJob(Student student, Job job);
+    int countByStatus(Application.ApplicationStatus status);
 }
