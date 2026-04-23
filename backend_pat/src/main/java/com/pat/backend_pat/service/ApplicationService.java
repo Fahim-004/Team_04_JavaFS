@@ -14,7 +14,7 @@ public class ApplicationService {
     @Autowired private ResumeRepository resumeRepository;
     @Autowired private ApplicationRepository applicationRepository;
     @Autowired private EligibilityService eligibilityService;
-
+    @Autowired private NotificationService notificationService;
     public Application applyForJob(Integer userId, Integer jobId, Integer resumeId) {
 
         Student student = studentRepository.findByUserUserId(userId)
@@ -44,7 +44,19 @@ public class ApplicationService {
         application.setJob(job);
         application.setResume(resume);
 
-        return applicationRepository.save(application);
+     // Save application
+        Application savedApplication =
+                applicationRepository.save(application);
+
+        // Trigger notification
+        notificationService.createNotification(
+                userId,
+                "Your application for '" + job.getJobTitle() +
+                "' at " + job.getEmployer().getCompanyName() +
+                " has been submitted successfully."
+        );
+
+        return savedApplication;
     }
 
     public List<Application> getStudentApplications(Integer userId) {

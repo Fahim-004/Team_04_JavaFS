@@ -27,11 +27,11 @@ public class Employer {
     @Column(insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // ✅ No-args constructor
+    // No-args constructor
     public Employer() {
     }
 
-    // ✅ All-args constructor
+    // All-args constructor
     public Employer(Integer employerId, User user, String companyName,
                     String companyDescription, Boolean approvedStatus,
                     LocalDateTime createdAt) {
@@ -43,7 +43,7 @@ public class Employer {
         this.createdAt = createdAt;
     }
 
-    // ✅ Getters & Setters
+    // Getters & Setters
 
     public Integer getEmployerId() {
         return employerId;
