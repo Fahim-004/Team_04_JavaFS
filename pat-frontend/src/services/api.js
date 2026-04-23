@@ -72,4 +72,13 @@ export const getJobApplicants = (jobId)  => api.get(`/jobs/${jobId}/applicants`)
 export const getEmployerProfile = () => api.get("/employers/profile");
 export const saveEmployerProfile = (data) => api.post("/employers/profile", data);
 
+
+// ── Admin ─────────────────────────────
+export const getAdminStudents = () => api.get("/admin/students");
+export const getAdminEmployers = () => api.get("/admin/employers");
+export const approveEmployer = (id) => api.put(`/admin/employers/${id}/approve`);
+export const removeEmployer = (id) => api.delete(`/admin/employers/${id}`);
+export const getAdminStatistics = () => api.get("/admin/statistics");
+
+
 export default api;
