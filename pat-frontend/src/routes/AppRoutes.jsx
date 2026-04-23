@@ -22,6 +22,8 @@ import AdminDashboard from "../pages/AdminDashboard/AdminDashboard";
 import ManageEmployersPage from "../pages/ManageEmployersPage/ManageEmployersPage";
 import ManageStudentsPage from "../pages/ManageStudentsPage/ManageStudentsPage";
 
+import RoundsManagerPage from "../pages/RoundsManagerPage/RoundsManagerPage";
+
 const AppRoutes = () => {
   return (
     <BrowserRouter>
@@ -48,6 +50,7 @@ const AppRoutes = () => {
         <Route path="/admin/employers" element={<ManageEmployersPage />} />
         <Route path="/admin/students" element={<ManageStudentsPage />} />
 
+        <Route path="/employer/jobs/:jobId/rounds" element={<RoundsManagerPage />} />
       </Routes>
     </BrowserRouter>
   );

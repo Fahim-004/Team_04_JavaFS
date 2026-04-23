@@ -107,16 +107,30 @@ const EmployerDashboard = () => {
                   <td className="px-4 py-3">{job.applicantCount || 0}</td>
 
                   <td className="px-4 py-3">
-                    <button
-                      onClick={() =>
-                        navigate(`/employer/jobs/${job.jobId}/applicants`)
-                      }
-                      className="text-sm"
-                      style={{ color: "#4c7ef0" }}
-                    >
-                      View Applicants
-                    </button>
-                  </td>
+                    <div style={{ display: "flex", gap: "12px" }}>
+                      
+                      <button
+                        onClick={() =>
+                          navigate(`/employer/jobs/${job.jobId}/applicants`)
+                        }
+                        className="text-sm"
+                        style={{ color: "#4c7ef0" }}
+                      >
+                        View Applicants
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          navigate(`/employer/jobs/${job.jobId}/rounds`)
+                        }
+                        className="text-sm"
+                        style={{ color: "#16a34a" }}
+                      >
+                        Manage Rounds
+                      </button>
+
+                    </div>
+                  </td>  
                 </tr>
               ))
             )}
