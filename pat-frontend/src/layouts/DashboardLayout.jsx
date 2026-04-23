@@ -4,6 +4,8 @@ import EmployerSidebar from "../components/EmployerSidebar/EmployerSidebar";
 
 import DashboardNavbar  from "../components/DashboardNavbar/DashboardNavbar";
 
+import AdminSidebar from "../components/AdminSidebar/AdminSidebar";
+
 const DashboardLayout = ({ children, title }) => {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -11,7 +13,9 @@ const DashboardLayout = ({ children, title }) => {
 
   return (
     <div className="flex" style={{ height: "100vh", overflow: "hidden", background: "#f0f2f8" }}>
-      {role === "employer" ? (
+      {role === "admin" ? (
+        <AdminSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+      ) : role === "employer" ? (
         <EmployerSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       ) : (
         <StudentSidebar collapsed={collapsed} setCollapsed={setCollapsed} />

@@ -76,4 +76,12 @@ export const getAcademicDetails = () => {
   return axios.get("/students/academic");
 };
 
+// ── Admin ─────────────────────────────
+export const getAdminStudents = () => api.get("/admin/students");
+export const getAdminEmployers = () => api.get("/admin/employers");
+export const approveEmployer = (id) => api.put(`/admin/employers/${id}/approve`);
+export const removeEmployer = (id) => api.delete(`/admin/employers/${id}`);
+export const getAdminStatistics = () => api.get("/admin/statistics");
+
+
 export default api;

@@ -55,19 +55,19 @@ const LoginPage = () => {
 };
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 min-h-screen">
+    <div className="grid grid-cols-1 min-h-screen">
 
-      {/* Left Branding */}
+      {/* //Left Branding
       <div className="hidden md:flex items-center justify-center bg-blue-700 text-white p-10">
         <div>
           <h1 className="text-4xl font-bold mb-4">Placement Automation Tool</h1>
           <p className="text-lg">Manage placement drives, upload resumes, and track applications in one platform.</p>
         </div>
-      </div>
+      </div> */}
 
       {/* Right Form */}
-      <div className="flex items-center justify-center bg-gray-100 min-h-screen">
-        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+      <div className="flex items-center justify-center bg-gray-100 min-h-screen ">
+        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md ">
 
           <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
 
