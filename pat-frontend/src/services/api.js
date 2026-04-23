@@ -1,46 +1,47 @@
 import axios from "axios";
 
-// Create axios instance
 const api = axios.create({
-  baseURL: "http://localhost:8080",
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: "http://localhost:8080/api/v1",
+  headers: { "Content-Type": "application/json" },
 });
 
-// Optional: Auto attach token
+// Attach JWT token automatically to every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// ── Keep your original loginUser with fetch (safest) ─────────────────
-export const loginUser = async (email, password) => {
-  try {
-    const response = await fetch("http://localhost:8080/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Login failed");
+// On 401 → clear storage and redirect to login
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("userName");
+      window.location.href = "/login";
     }
-
-    return data;
-  } catch (error) {
-    throw error;
+    return Promise.reject(err);
   }
-};
+);
 
-// ── All other APIs (now working) ─────────────────────────────────────
-export const getDashboardStats = () => api.get("/students/dashboard/stats");
+// ── students Profile ───────────────────────────────────────────
+export const getStudentProfile  = ()     => api.get("/students/profile");
+export const savePersonalDetails = (data) => api.put("/students/profile", data);
 
+export const saveAcademicDetails = (data) => api.put("/students/academic", data);
+// ── Resume Upload ──────────────────────────────────────────────
+export const uploadResume = (filePath) =>
+  api.post("/students/resume", null, {
+    params: { filePath },
+  });
+
+// ── Dashboard ─────────────────────────────────────────────────
+export const getDashboardStats  = ()     => api.get("/students/dashboard/stats");
+
+// ── Jobs ──────────────────────────────────────────────────────
 export const getAllJobs = (branch, minCgpa) => {
   const params = {};
   if (branch) params.branch = branch;
@@ -57,9 +58,6 @@ export const getMyApplications = () => api.get("/students/applications");
 
 export const getStudentResumes = () => api.get("/students/resumes");
 
-export const postJob = (data) => api.post("/jobs", data);
-export const getEmployerJobs = () => api.get("/employers/jobs");
-export const getJobApplicants = (jobId) => api.get(`/jobs/${jobId}/applicants`);
 
 // ── Employer ──────────────────────────────────────────────────
 export const postJob          = (data)   => api.post("/jobs", data);
@@ -71,10 +69,6 @@ export const getJobApplicants = (jobId)  => api.get(`/jobs/${jobId}/applicants`)
 export const getEmployerProfile = () => api.get("/employers/profile");
 export const saveEmployerProfile = (data) => api.post("/employers/profile", data);
 
-// ── Academic Details ───────────────────────────────────────────
-export const getAcademicDetails = () => {
-  return axios.get("/students/academic");
-};
 
 // ── Admin ─────────────────────────────
 export const getAdminStudents = () => api.get("/admin/students");
@@ -83,5 +77,8 @@ export const approveEmployer = (id) => api.put(`/admin/employers/${id}/approve`)
 export const removeEmployer = (id) => api.delete(`/admin/employers/${id}`);
 export const getAdminStatistics = () => api.get("/admin/statistics");
 
-
+// ── Academic Details ───────────────────────────────────────────
+export const getAcademicDetails = () => {
+  return api.get("/students/academic");
+};
 export default api;

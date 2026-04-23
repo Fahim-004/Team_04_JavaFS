@@ -41,7 +41,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         {/* Logo — hidden when collapsed */}
         {!collapsed && (
           <div style={{ flex: 1, minWidth: 0 }}>
-            <Link to="/" className="text-lg font-semibold cursor-pointer" style={{ color: "#6c8af7", whiteSpace: "nowrap" }}>
+            <Link to="/dashboard" className="text-lg font-semibold cursor-pointer" style={{ color: "#6c8af7", whiteSpace: "nowrap" }}>
               PAT
             </Link>
             <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)", whiteSpace: "nowrap" }}>
