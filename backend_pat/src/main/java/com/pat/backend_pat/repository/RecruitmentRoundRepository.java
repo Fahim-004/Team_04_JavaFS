@@ -1,9 +1,13 @@
 package com.pat.backend_pat.repository;
+
+import com.pat.backend_pat.entity.Job;
 import com.pat.backend_pat.entity.RecruitmentRound;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.util.List;
 
-@Repository
-public interface RecruitmentRoundRepository extends JpaRepository<RecruitmentRound,Integer>{
+public interface RecruitmentRoundRepository extends JpaRepository<RecruitmentRound, Integer> {
 
+    List<RecruitmentRound> findByJobOrderByRoundOrderAsc(Job job);
+
+    boolean existsByJobAndRoundOrder(Job job, Integer roundOrder);
 }
