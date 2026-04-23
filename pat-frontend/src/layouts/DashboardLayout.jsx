@@ -1,9 +1,7 @@
 import { useState } from "react";
 import StudentSidebar from "../components/Sidebar/StudentSidebar";
 import EmployerSidebar from "../components/EmployerSidebar/EmployerSidebar";
-
 import DashboardNavbar  from "../components/DashboardNavbar/DashboardNavbar";
-
 import AdminSidebar from "../components/AdminSidebar/AdminSidebar";
 
 const DashboardLayout = ({ children, title }) => {

@@ -81,4 +81,20 @@ export const getAdminStatistics = () => api.get("/admin/statistics");
 export const getAcademicDetails = () => {
   return api.get("/students/academic");
 };
+
+// ── Notifications ─────────────────────────────────────────────
+export const getNotifications = () => api.get("/notifications");
+export const markNotificationRead = (id) =>
+  api.put(`/notifications/${id}/read`);
+
+// ── Recruitment Rounds ────────────────────────────────────────
+export const createRound = (jobId, data) =>
+  api.post(`/jobs/${jobId}/rounds`, data);
+
+export const getJobRounds = (jobId) =>
+  api.get(`/jobs/${jobId}/rounds`);
+
+export const updateRoundResult = (applicationId, data) =>
+  api.put(`/applications/${applicationId}/round-result`, data);
+
 export default api;

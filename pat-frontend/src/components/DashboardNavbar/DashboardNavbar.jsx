@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
+import NotificationBell from "../NotificationBell/NotificationBell";
 
 const DashboardNavbar = ({ title }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -50,6 +51,9 @@ const DashboardNavbar = ({ title }) => {
 
       {/* Right — welcome text + avatar */}
       <div className="flex items-center gap-4">
+
+        {/* 🔔 Notification Bell */}
+        <NotificationBell />
         
 
         {/* Avatar + dropdown */}
