@@ -38,14 +38,26 @@ const LoginPage = () => {
       return;
     }
 
+    // 1. Update AuthContext (MOST IMPORTANT LINE)
     login(data.token, data.role, data.userId);
-    // store the name returned from backend
-    localStorage.setItem("userName", data.name);
 
-    if (data.role === "student") navigate("/dashboard");
+    // 2. Store optional data
+    localStorage.setItem("userName", data.name || "User");
+
+    // 3. Navigate based on role
+    if (data.role === "admin") navigate("/admin/dashboard");
     else if (data.role === "employer") navigate("/employer/dashboard");
-    else if (data.role === "admin") navigate("/admin/dashboard");
     else navigate("/dashboard");
+
+//     console.log("LOGIN RESPONSE:", data);
+
+// // ✅ call login
+// login(data.token, data.role, data.userId);
+
+// console.log("AFTER LOGIN CALL");
+
+// // check storage immediately
+// console.log("TOKEN AFTER LOGIN:", localStorage.getItem("token"));
 
   } catch (err) {
     setError("Unable to connect to server. Please try again.");
