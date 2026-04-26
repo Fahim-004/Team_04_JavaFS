@@ -47,6 +47,7 @@ public class RecruitmentRoundService {
     public RoundResult updateRoundResult(Integer applicationId,
                                          Integer roundId,
                                          String status) {
+    	RoundStatus roundStatus = RoundStatus.valueOf(status.toUpperCase());
 
         Application application = applicationRepository.findById(applicationId)
             .orElseThrow(() -> new RuntimeException("Application not found"));
@@ -61,24 +62,24 @@ public class RecruitmentRoundService {
 
         if (existing.isPresent()) {
             result = existing.get();
-            result.setStatus(status);
+            result.setStatus(roundStatus);
             result.setUpdatedAt(LocalDateTime.now());
         } else {
             result = new RoundResult();
             result.setApplication(application);
             result.setRound(round);
-            result.setStatus(status);
+            result.setStatus(roundStatus);
         }
 
         RoundResult saved = roundResultRepository.save(result);
 
         // ✅ MAIN FIX (ENUM SAFE)
         switch (status) {
-            case "Failed":
+            case "FAILED":
                 application.setStatus(ApplicationStatus.Rejected);
                 break;
 
-            case "Passed":
+            case "PASSED":
                 if (isFinalRound(round)) {
                     application.setStatus(ApplicationStatus.Selected);
                 } else {
@@ -86,7 +87,7 @@ public class RecruitmentRoundService {
                 }
                 break;
 
-            case "Pending":
+            case "PENDING":
                 application.setStatus(ApplicationStatus.Applied);
                 break;
 
