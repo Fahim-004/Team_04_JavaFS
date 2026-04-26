@@ -50,8 +50,12 @@ public class JobController {
             Authentication auth
     ) {
 
-        // Get logged-in user ID
-        Integer userId = (Integer) auth.getDetails();
+        // Get logged-in email
+        String email = auth.getName();
+
+        // Convert email → userId
+        Integer userId =
+                applicationService.getUserIdFromEmail(email);
 
         // Extract resumeId
         Integer resumeId = body.get("resumeId");

@@ -29,14 +29,13 @@ public class RecruitmentRoundController {
         return ResponseEntity.ok(roundService.getRoundsForJob(jobId));
     }
 
-    @PutMapping("/applications/{applicationId}/round-result")
-    public ResponseEntity<?> updateRoundResult(
-        @PathVariable Integer applicationId,
-        @RequestBody Map<String, Object> body
-    ) {
-        Integer roundId = (Integer) body.get("roundId");
-        String status   = (String)  body.get("status");
-        return ResponseEntity.ok(
-            roundService.updateRoundResult(applicationId, roundId, status));
+    @PutMapping("/rounds/update-result")
+    public ResponseEntity<?> updateResult(
+            @RequestParam Integer applicationId,
+            @RequestParam Integer roundId,
+            @RequestParam String status) {
+
+        roundService.updateRoundResult(applicationId, roundId, status);
+        return ResponseEntity.ok("Updated");
     }
 }
