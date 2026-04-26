@@ -2,21 +2,35 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { getMyApplications } from "../../services/api";
 
+// const STATUS_STYLES = {
+//   Applied:     { background: "#eff6ff", color: "#1d4ed8" },
+//   Shortlisted: { background: "#fefce8", color: "#92400e" },
+//   Selected:    { background: "#f0fdf4", color: "#166534" },
+//   Rejected:    { background: "#fef2f2", color: "#991b1b" },
+// };
+
 const STATUS_STYLES = {
-  Applied:     { background: "#eff6ff", color: "#1d4ed8" },
+  Applied: { background: "#eff6ff", color: "#1d4ed8" },
   Shortlisted: { background: "#fefce8", color: "#92400e" },
-  Selected:    { background: "#f0fdf4", color: "#166534" },
-  Rejected:    { background: "#fef2f2", color: "#991b1b" },
+  Selected: { background: "#f0fdf4", color: "#166534" },
+  Rejected: { background: "#fef2f2", color: "#991b1b" },
+};
+
+const normalizeStatus = (status) => {
+  if (!status) return "Applied";
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 };
 
 const StatusBadge = ({ status }) => {
-  const style = STATUS_STYLES[status] || STATUS_STYLES["Applied"];
+  const normalized = normalizeStatus(status);
+  const style = STATUS_STYLES[normalized] || STATUS_STYLES["Applied"];
+
   return (
     <span
       className="text-xs font-semibold px-2.5 py-1 rounded-full"
       style={style}
     >
-      {status}
+      {normalized}
     </span>
   );
 };

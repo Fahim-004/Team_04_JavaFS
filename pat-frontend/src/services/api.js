@@ -94,7 +94,13 @@ export const createRound = (jobId, data) =>
 export const getJobRounds = (jobId) =>
   api.get(`/jobs/${jobId}/rounds`);
 
-export const updateRoundResult = (applicationId, data) =>
-  api.put(`/applications/${applicationId}/round-result`, data);
+export const updateRoundResult = (applicationId, roundId, status) =>
+  api.put(`/rounds/update-result`, null, {
+    params: {
+      applicationId,
+      roundId,
+      status,
+    },
+  });
 
 export default api;

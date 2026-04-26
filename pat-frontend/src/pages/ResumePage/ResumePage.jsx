@@ -41,7 +41,7 @@ const ResumePage = () => {
       <div className="bg-white p-6 rounded-lg shadow max-w-xl">
 
         <div className="border-2 border-dashed border-blue-300 rounded-lg p-8 text-center mb-6">
-          <p className="text-gray-500 mb-3 text-sm">Upload your resume in PDF format</p>
+          <p className="text-gray-500 mb-3 text-sm">Upload your resume in PDF</p>
           <label className="cursor-pointer bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition text-sm">
             Choose PDF File
             <input type="file" accept=".pdf" onChange={handleUpload} className="hidden" />

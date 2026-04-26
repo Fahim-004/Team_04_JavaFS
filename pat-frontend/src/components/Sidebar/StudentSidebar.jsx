@@ -5,7 +5,7 @@ const navLinks = [
   { path: "/jobs",             label: "Placement Drives", icon: "🏢" },
   { path: "/my-applications",  label: "My Applications",  icon: "📋" },
   { path: "/academic",         label: "Academic Details", icon: "🎓" },
-  { path: "/resume",           label: "Resume",           icon: "📄" },
+  // { path: "/resume",           label: "Resume",           icon: "📄" },
   { path: "/profile",          label: "Profile",          icon: "👤" },
 ];
 

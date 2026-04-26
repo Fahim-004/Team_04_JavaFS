@@ -299,7 +299,7 @@ const handleResumeUpload = async () => {
                   Upload Resume
                 </h2>
                 <p className="text-sm mb-4" style={{ color: "#6b7280" }}>
-                  Upload your resume in PDF format.
+                  Upload your resume in PDF format, File size should be less than 1MB.
                 </p>
                 <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
                   <input

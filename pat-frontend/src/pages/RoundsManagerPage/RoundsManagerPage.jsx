@@ -92,19 +92,20 @@ const RoundsManagerPage = () => {
 
   // 🔁 Update result
   const handleUpdate = async (applicationId, roundId, status) => {
-    try {
-      await updateRoundResult(applicationId, {
-        roundId,
-        status,
-      });
+  try {
+    const res = await updateRoundResult(applicationId, roundId, status);
 
-      showToast("success", "Result updated");
+    console.log("UPDATE RESPONSE:", res);
 
-      fetchData(); // simple + safe
-    } catch {
-      showToast("error", "Update failed");
-    }
-  };
+    showToast("success", "Result updated");
+
+    fetchData();
+  } catch (err) {
+    console.error("UPDATE ERROR:", err);
+
+    showToast("error", err?.response?.data || "Update failed");
+  }
+};
 
   return (
     <DashboardLayout title="Rounds Manager">
