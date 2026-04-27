@@ -1,5 +1,6 @@
 package com.pat.backend_pat.controller;
 
+import com.pat.backend_pat.service.ApplicationService;
 import com.pat.backend_pat.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,12 +13,15 @@ public class NotificationController {
 	 @Autowired
 	    private NotificationService notificationService;
 
+	 @Autowired
+	 private ApplicationService applicationService;
+
 	    // GET all notifications for logged-in user
 	    @GetMapping("/notifications")
 	    public ResponseEntity<?> getNotifications(Authentication auth) {
 
-	        // Get logged-in userId from JWT
-	        Integer userId = (Integer) auth.getDetails();
+	        String email = auth.getName();
+	        Integer userId = applicationService.getUserIdFromEmail(email);
 
 	        return ResponseEntity.ok(
 	                notificationService.getNotifications(userId)

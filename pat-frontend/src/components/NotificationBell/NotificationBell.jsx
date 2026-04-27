@@ -1,6 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { getNotifications, markNotificationRead } from "../../services/api";
 
+const normalizeNotification = (notification) => ({
+  ...notification,
+  isRead: Boolean(notification?.isRead ?? notification?.read),
+});
+
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
@@ -10,7 +15,8 @@ const NotificationBell = () => {
   useEffect(() => {
     getNotifications()
       .then(res => {
-        setNotifications(Array.isArray(res.data) ? res.data: []);
+        const list = Array.isArray(res.data) ? res.data : [];
+        setNotifications(list.map(normalizeNotification));
       })
       .catch(() => setNotifications([]));
   }, []);
@@ -36,7 +42,7 @@ const NotificationBell = () => {
       // ✅ NO refetch — local update
       setNotifications(prev =>
         prev.map(n =>
-          n.notificationId === id ? { ...n, isRead: true } : n
+          n.notificationId === id ? { ...n, isRead: true, read: true } : n
         )
       );
     } catch (err) {
@@ -150,7 +156,7 @@ const NotificationBell = () => {
                     color: "#9ca3af",
                   }}
                 >
-                  {n.created ? new Date(n.createdAt).toLocaleString() : ""}
+                  {n.createdAt ? new Date(n.createdAt).toLocaleString() : ""}
                 </p>
               </div>
             ))

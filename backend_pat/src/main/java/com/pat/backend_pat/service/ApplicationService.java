@@ -1,33 +1,44 @@
 package com.pat.backend_pat.service;
 
+import com.pat.backend_pat.dto.StudentApplicationViewDTO;
 import com.pat.backend_pat.entity.*;
 import com.pat.backend_pat.entity.Application.ApplicationStatus;
 import com.pat.backend_pat.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ApplicationService {
 
-    @Autowired private StudentRepository studentRepository;
-    @Autowired private JobRepository jobRepository;
-    @Autowired private ResumeRepository resumeRepository;
-    @Autowired private ApplicationRepository applicationRepository;
-    @Autowired private EligibilityService eligibilityService;
-    @Autowired private NotificationService notificationService;
-    @Autowired private UserRepository userRepository;
+    @Autowired
+    private StudentRepository studentRepository;
+    @Autowired
+    private JobRepository jobRepository;
+    @Autowired
+    private ResumeRepository resumeRepository;
+    @Autowired
+    private ApplicationRepository applicationRepository;
+    @Autowired
+    private EligibilityService eligibilityService;
+    @Autowired
+    private NotificationService notificationService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private RoundResultRepository roundResultRepository;
 
     public Application applyForJob(Integer userId, Integer jobId, Integer resumeId) {
 
         Student student = studentRepository.findByUserUserId(userId)
-            .orElseThrow(() -> new RuntimeException("Student profile not found"));
+                .orElseThrow(() -> new RuntimeException("Student profile not found"));
 
         Job job = jobRepository.findById(jobId)
-            .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() -> new RuntimeException("Job not found"));
 
         Resume resume = resumeRepository.findById(resumeId)
-            .orElseThrow(() -> new RuntimeException("Resume not found"));
+                .orElseThrow(() -> new RuntimeException("Resume not found"));
 
         if (!resume.getStudent().getStudentId().equals(student.getStudentId())) {
             throw new RuntimeException("Resume does not belong to this student");
@@ -45,27 +56,54 @@ public class ApplicationService {
         application.setResume(resume);
 
         // ✅ ENUM FIX
-        application.setStatus(ApplicationStatus.APPLIED);
+        application.setStatus(ApplicationStatus.Applied);
 
         Application saved = applicationRepository.save(application);
 
         notificationService.createNotification(
-            userId,
-            "Application submitted successfully"
-        );
+                userId,
+                "Application submitted successfully");
 
         return saved;
     }
 
-    public List<Application> getStudentApplications(Integer userId) {
+    public List<StudentApplicationViewDTO> getStudentApplications(Integer userId) {
         Student student = studentRepository.findByUserUserId(userId)
-            .orElseThrow(() -> new RuntimeException("Student not found"));
-        return applicationRepository.findByStudent(student);
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        List<Application> applications = applicationRepository.findByStudent(student);
+
+        return applications.stream().map(application -> {
+            RoundResult latestRoundResult = roundResultRepository
+                    .findTopByApplicationOrderByRoundRoundOrderDescUpdatedAtDesc(application)
+                    .orElse(null);
+
+            String roundName = latestRoundResult != null
+                    ? latestRoundResult.getRound().getRoundName()
+                    : null;
+            Integer roundOrder = latestRoundResult != null
+                    ? latestRoundResult.getRound().getRoundOrder()
+                    : null;
+            String roundResult = latestRoundResult != null
+                    ? latestRoundResult.getStatus().name()
+                    : null;
+
+            return new StudentApplicationViewDTO(
+                    application.getApplicationId(),
+                    application.getJob().getJobTitle(),
+                    application.getJob().getEmployer().getCompanyName(),
+                    application.getJob().getSalaryPackage(),
+                    application.getStatus(),
+                    application.getAppliedAt(),
+                    roundName,
+                    roundOrder,
+                    roundResult);
+        }).collect(Collectors.toList());
     }
 
     public Integer getUserIdFromEmail(String email) {
         User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
         return user.getUserId();
     }
 }

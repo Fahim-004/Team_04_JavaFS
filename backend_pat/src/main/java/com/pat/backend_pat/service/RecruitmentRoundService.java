@@ -13,14 +13,20 @@ import java.util.Optional;
 @Service
 public class RecruitmentRoundService {
 
-    @Autowired private JobRepository jobRepository;
-    @Autowired private RecruitmentRoundRepository roundRepository;
-    @Autowired private ApplicationRepository applicationRepository;
-    @Autowired private RoundResultRepository roundResultRepository;
+    @Autowired
+    private JobRepository jobRepository;
+    @Autowired
+    private RecruitmentRoundRepository roundRepository;
+    @Autowired
+    private ApplicationRepository applicationRepository;
+    @Autowired
+    private RoundResultRepository roundResultRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     public RecruitmentRound createRound(Integer jobId, String roundName, Integer roundOrder) {
         Job job = jobRepository.findById(jobId)
-            .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() -> new RuntimeException("Job not found"));
 
         RecruitmentRound round = new RecruitmentRound();
         round.setJob(job);
@@ -32,33 +38,71 @@ public class RecruitmentRoundService {
 
     public List<RecruitmentRound> getRoundsForJob(Integer jobId) {
         Job job = jobRepository.findById(jobId)
-            .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() -> new RuntimeException("Job not found"));
         return roundRepository.findByJobOrderByRoundOrderAsc(job);
     }
 
     private boolean isFinalRound(RecruitmentRound currentRound) {
-        List<RecruitmentRound> rounds =
-            roundRepository.findByJobOrderByRoundOrderAsc(currentRound.getJob());
+        List<RecruitmentRound> rounds = roundRepository.findByJobOrderByRoundOrderAsc(currentRound.getJob());
 
         return rounds.get(rounds.size() - 1).getRoundId()
                 .equals(currentRound.getRoundId());
     }
 
+    private void validateRoundUpdateOrder(Application application,
+            RecruitmentRound currentRound) {
+
+        if (!application.getJob().getJobId().equals(currentRound.getJob().getJobId())) {
+            throw new RuntimeException("Round does not belong to this application's job");
+        }
+
+        List<RecruitmentRound> rounds = roundRepository.findByJobOrderByRoundOrderAsc(currentRound.getJob());
+
+        for (RecruitmentRound round : rounds) {
+            if (round.getRoundOrder() >= currentRound.getRoundOrder()) {
+                continue;
+            }
+
+            Optional<RoundResult> priorResult = roundResultRepository
+                    .findByApplicationAndRound(application, round);
+
+            if (priorResult.isEmpty()) {
+                throw new RuntimeException(
+                        "Blocked at Round " + round.getRoundOrder() + " ("
+                                + round.getRoundName() + "): result not updated yet");
+            }
+
+            if (priorResult.get().getStatus() != RoundStatus.PASSED) {
+                throw new RuntimeException(
+                        "Blocked at Round " + round.getRoundOrder() + " ("
+                                + round.getRoundName() + "): status is "
+                                + priorResult.get().getStatus() + ", expected PASSED");
+            }
+        }
+    }
+
     public RoundResult updateRoundResult(Integer applicationId,
-                                         Integer roundId,
-                                         String status) {
-    	RoundStatus roundStatus = RoundStatus.valueOf(status.toUpperCase());
+            Integer roundId,
+            String status) {
+
+        System.out.println("STATUS RECEIVED: " + status);
+        RoundStatus roundStatus = RoundStatus.valueOf(status.toUpperCase());
 
         Application application = applicationRepository.findById(applicationId)
-            .orElseThrow(() -> new RuntimeException("Application not found"));
+                .orElseThrow(() -> new RuntimeException("Application not found"));
 
         RecruitmentRound round = roundRepository.findById(roundId)
-            .orElseThrow(() -> new RuntimeException("Round not found"));
+                .orElseThrow(() -> new RuntimeException("Round not found"));
 
-        Optional<RoundResult> existing =
-            roundResultRepository.findByApplicationAndRound(application, round);
+        validateRoundUpdateOrder(application, round);
+
+        Optional<RoundResult> existing = roundResultRepository.findByApplicationAndRound(application, round);
+        RoundStatus previousRoundStatus = existing.map(RoundResult::getStatus).orElse(null);
+        String previousApplicationStatus = application.getStatus();
 
         RoundResult result;
+        System.out.println("ROUND STATUS: " + roundStatus);
+        System.out.println("APPLICATION BEFORE: " + application.getStatus());
 
         if (existing.isPresent()) {
             result = existing.get();
@@ -73,13 +117,15 @@ public class RecruitmentRoundService {
 
         RoundResult saved = roundResultRepository.save(result);
 
-        // ✅ MAIN FIX (ENUM SAFE)
-        switch (status) {
-            case "FAILED":
+        // Use parsed enum to avoid case-mismatch bugs from request input.
+        switch (roundStatus) {
+            case FAILED:
+                System.out.println("SETTING REJECTED");
                 application.setStatus(ApplicationStatus.Rejected);
                 break;
 
-            case "PASSED":
+            case PASSED:
+                System.out.println("SETTING PASSED LOGIC");
                 if (isFinalRound(round)) {
                     application.setStatus(ApplicationStatus.Selected);
                 } else {
@@ -87,7 +133,8 @@ public class RecruitmentRoundService {
                 }
                 break;
 
-            case "PENDING":
+            case PENDING:
+                System.out.println("SETTING APPLIED");
                 application.setStatus(ApplicationStatus.Applied);
                 break;
 
@@ -96,6 +143,32 @@ public class RecruitmentRoundService {
         }
 
         applicationRepository.save(application);
+
+        String companyName = application.getJob().getEmployer().getCompanyName();
+        String jobTitle = application.getJob().getJobTitle();
+        String roundLabel = "Round " + round.getRoundOrder() + " (" + round.getRoundName() + ")";
+        String resultMessage;
+
+        if (previousRoundStatus == null) {
+            resultMessage = "Update: " + roundLabel + " result is " + roundStatus + " for "
+                    + jobTitle + " at " + companyName + ".";
+        } else {
+            resultMessage = "Update: " + roundLabel + " result changed from " + previousRoundStatus
+                    + " to " + roundStatus + " for " + jobTitle + " at " + companyName + ".";
+        }
+
+        notificationService.createNotification(
+                application.getStudent().getUser().getUserId(),
+                resultMessage);
+
+        if (!previousApplicationStatus.equals(application.getStatus())) {
+            notificationService.createNotification(
+                    application.getStudent().getUser().getUserId(),
+                    "Application status changed to " + application.getStatus() + " for " + jobTitle
+                            + " at " + companyName + ".");
+        }
+
+        System.out.println("APPLICATION AFTER: " + application.getStatus());
 
         return saved;
     }

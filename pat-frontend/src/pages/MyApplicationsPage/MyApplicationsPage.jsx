@@ -42,14 +42,23 @@ const formatDate = (dateStr) => {
   });
 };
 
+const hasAdvancedToNextRound = (app) => {
+  const appStatus = normalizeStatus(app?.applicationStatus);
+  const roundResult = (app?.currentRoundResult || "").toUpperCase();
+  return appStatus === "Shortlisted" && roundResult === "PASSED";
+};
+
 const MyApplicationsPage = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     getMyApplications()
       .then((res) => setApplications(res.data || []))
-      .catch(() => {})
+      .catch((err) => {
+        setError(err?.response?.data?.error || "Failed to load applications");
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -85,6 +94,12 @@ const MyApplicationsPage = () => {
         </div>
 
         <div className="px-6 py-6">
+          {error ? (
+            <p className="text-center py-3 text-sm" style={{ color: "#b91c1c" }}>
+              {error}
+            </p>
+          ) : null}
+
           {loading ? (
             <p className="text-center py-12 text-sm" style={{ color: "#9ca3af" }}>
               Loading your applications...
@@ -104,16 +119,28 @@ const MyApplicationsPage = () => {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-sm font-semibold" style={{ color: "#111827" }}>
-                        {app.job?.jobTitle || "—"}
+                        {app.jobTitle || "—"}
                       </p>
                       <p className="text-xs mt-0.5" style={{ color: "#6b7280" }}>
-                        {app.job?.employer?.companyName || "—"}
+                        {app.companyName || "—"}
                       </p>
                       <p className="text-xs mt-1" style={{ color: "#9ca3af" }}>
-                        💰 {app.job?.salaryPackage || "—"}
+                        💰 {app.salaryPackage || "—"}
                       </p>
+                      <p className="text-xs mt-2" style={{ color: "#6b7280" }}>
+                        Current round: {app.currentRoundOrder ? `Round ${app.currentRoundOrder}` : "Not started"}
+                        {app.currentRoundName ? ` (${app.currentRoundName})` : ""}
+                      </p>
+                      <p className="text-xs mt-1" style={{ color: "#6b7280" }}>
+                        Round result: {app.currentRoundResult || "Pending"}
+                      </p>
+                      {hasAdvancedToNextRound(app) ? (
+                        <p className="text-xs mt-1 font-semibold" style={{ color: "#0f766e" }}>
+                          Advanced to next round
+                        </p>
+                      ) : null}
                     </div>
-                    <StatusBadge status={app.status} />
+                    <StatusBadge status={app.applicationStatus} />
                   </div>
                   <p className="text-xs mt-3" style={{ color: "#9ca3af" }}>
                     Applied on {formatDate(app.appliedAt)}

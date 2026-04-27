@@ -9,5 +9,8 @@ import java.util.Optional;
 public interface RoundResultRepository extends JpaRepository<RoundResult, Integer> {
 
     Optional<RoundResult> findByApplicationAndRound(
-        Application application, RecruitmentRound round);
+            Application application, RecruitmentRound round);
+
+    Optional<RoundResult> findTopByApplicationOrderByRoundRoundOrderDescUpdatedAtDesc(
+            Application application);
 }
