@@ -5,6 +5,8 @@ import com.pat.backend_pat.entity.Application.ApplicationStatus;
 import com.pat.backend_pat.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,10 +25,35 @@ public class RecruitmentRoundService {
     private RoundResultRepository roundResultRepository;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private EmployerRepository employerRepository;
 
-    public RecruitmentRound createRound(Integer jobId, String roundName, Integer roundOrder) {
+    private void validateEmployerJobAccess(String email, Job job) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        if (user.getRole() != User.Role.employer) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only employers can manage recruitment rounds");
+        }
+
+        Employer employer = employerRepository.findByUserUserId(user.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Employer profile not found"));
+
+        if (!employer.getEmployerId().equals(job.getEmployer().getEmployerId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You are not authorized to manage rounds for this job");
+        }
+    }
+
+    public RecruitmentRound createRound(Integer jobId, String email, String roundName, Integer roundOrder) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        validateEmployerJobAccess(email, job);
 
         RecruitmentRound round = new RecruitmentRound();
         round.setJob(job);
@@ -36,9 +63,12 @@ public class RecruitmentRoundService {
         return roundRepository.save(round);
     }
 
-    public List<RecruitmentRound> getRoundsForJob(Integer jobId) {
+    public List<RecruitmentRound> getRoundsForJob(Integer jobId, String email) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        validateEmployerJobAccess(email, job);
+
         return roundRepository.findByJobOrderByRoundOrderAsc(job);
     }
 
@@ -83,6 +113,7 @@ public class RecruitmentRoundService {
 
     public RoundResult updateRoundResult(Integer applicationId,
             Integer roundId,
+            String email,
             String status) {
 
         System.out.println("STATUS RECEIVED: " + status);
@@ -93,6 +124,8 @@ public class RecruitmentRoundService {
 
         RecruitmentRound round = roundRepository.findById(roundId)
                 .orElseThrow(() -> new RuntimeException("Round not found"));
+
+        validateEmployerJobAccess(email, application.getJob());
 
         validateRoundUpdateOrder(application, round);
 

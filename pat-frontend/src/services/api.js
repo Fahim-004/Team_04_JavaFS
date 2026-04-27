@@ -63,6 +63,7 @@ export const getStudentResumes = () => api.get("/students/resumes");
 export const postJob          = (data)   => api.post("/jobs", data);
 export const getEmployerJobs  = ()       => api.get("/employers/jobs");
 export const getJobApplicants = (jobId)  => api.get(`/jobs/${jobId}/applicants`);
+export const getRoundsApplicants = (jobId) => api.get(`/jobs/${jobId}/rounds/applicants`);
 
 
 // ── Employer Profile ───────────────────────────────────────────

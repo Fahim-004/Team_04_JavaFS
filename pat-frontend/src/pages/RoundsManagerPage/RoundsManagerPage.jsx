@@ -6,7 +6,7 @@ import {
   createRound,
   getJobRounds,
   updateRoundResult,
-  getJobApplicants,
+  getRoundsApplicants,
 } from "../../services/api";
 
 // Toast (same style as ProfilePage)
@@ -51,13 +51,40 @@ const RoundsManagerPage = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
+  const getErrorMessage = (err, fallback) => {
+    if (!err?.response?.data) return fallback;
+    if (typeof err.response.data === "string") return err.response.data;
+    return err.response.data.error || err.response.data.message || fallback;
+  };
+
+  const getRoundResultForApplicant = (app, round) => {
+    const result = (app.roundResults || []).find(
+      (r) => r.roundId === round.roundId || r.roundOrder === round.roundOrder
+    );
+
+    return result?.status || "NOT_UPDATED";
+  };
+
+  const isEligibleForRound = (app, round) => {
+    const previousRounds = rounds.filter((r) => r.roundOrder < round.roundOrder);
+    if (previousRounds.length === 0) return true;
+
+    return previousRounds.every((prevRound) => {
+      const prevResult = (app.roundResults || []).find(
+        (r) => r.roundId === prevRound.roundId || r.roundOrder === prevRound.roundOrder
+      );
+
+      return prevResult?.status === "PASSED";
+    });
+  };
+
   // 🔄 Fetch data
   const fetchData = () => {
     getJobRounds(jobId)
       .then(res => setRounds(Array.isArray(res.data) ? res.data : []))
       .catch(() => setRounds([]));
 
-    getJobApplicants(jobId)
+    getRoundsApplicants(jobId)
       .then(res => setApplicants(Array.isArray(res.data) ? res.data : []))
       .catch(() => setApplicants([]));
   };
@@ -86,26 +113,22 @@ const RoundsManagerPage = () => {
 
       fetchData();
     } catch (err) {
-      showToast("error", err.response?.data || "Failed to add round");
+      showToast("error", getErrorMessage(err, "Failed to add round"));
     }
   };
 
   // 🔁 Update result
   const handleUpdate = async (applicationId, roundId, status) => {
-  try {
-    const res = await updateRoundResult(applicationId, roundId, status);
+    try {
+      await updateRoundResult(applicationId, roundId, status);
 
-    console.log("UPDATE RESPONSE:", res);
+      showToast("success", "Result updated");
 
-    showToast("success", "Result updated");
-
-    fetchData();
-  } catch (err) {
-    console.error("UPDATE ERROR:", err);
-
-    showToast("error", err?.response?.data || "Update failed");
-  }
-};
+      fetchData();
+    } catch (err) {
+      showToast("error", getErrorMessage(err, "Update failed"));
+    }
+  };
 
   return (
     <DashboardLayout title="Rounds Manager">
@@ -187,8 +210,14 @@ const RoundsManagerPage = () => {
             {/* 👥 Applicants */}
             {applicants.length === 0 ? (
               <p style={{ color: "#9ca3af" }}>No applicants found.</p>
+            ) : applicants.filter((app) => isEligibleForRound(app, round)).length === 0 ? (
+              <p style={{ color: "#9ca3af" }}>
+                No eligible candidates for this round yet. Only candidates who passed all preceding rounds are shown.
+              </p>
             ) : (
-              applicants.map((app) => (
+              applicants
+                .filter((app) => isEligibleForRound(app, round))
+                .map((app) => (
                 <div
                   key={app.applicationId}
                   style={{
@@ -199,10 +228,15 @@ const RoundsManagerPage = () => {
                     borderBottom: "1px solid #f3f4f6",
                   }}
                 >
-                  <span>{app.student?.fullName || "Unknown"}</span>
+                  <div>
+                    <span>{app.studentName || "Unknown"}</span>
+                    <p style={{ color: "#6b7280", fontSize: "12px", marginTop: "4px" }}>
+                      Status in this round: {getRoundResultForApplicant(app, round).replace("_", " ")}
+                    </p>
+                  </div>
 
                   <div style={{ display: "flex", gap: "8px" }}>
-                    {["Passed", "Failed", "Pending"].map((status) => (
+                    {["Passed", "Failed"].map((status) => (
                       <button
                         key={status}
                         onClick={() =>

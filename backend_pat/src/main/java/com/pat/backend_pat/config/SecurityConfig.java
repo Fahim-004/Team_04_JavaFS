@@ -37,19 +37,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configure(http))
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/jobs").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/jobs/**").permitAll()
-                .requestMatchers("/api/v1/admin/**").hasAuthority("ROLE_admin")
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthFilter, 
-                UsernamePasswordAuthenticationFilter.class);
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configure(http))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/jobs").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/jobs/*").permitAll()
+                        .requestMatchers("/api/v1/admin/**").hasAuthority("ROLE_admin")
+                        .requestMatchers("/api/v1/employers/**").hasAuthority("ROLE_employer")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/jobs").hasAuthority("ROLE_employer")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/jobs/*/applicants").hasAuthority("ROLE_employer")
+                        .requestMatchers("/api/v1/jobs/*/rounds").hasAuthority("ROLE_employer")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/rounds/update-result").hasAuthority("ROLE_employer")
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
