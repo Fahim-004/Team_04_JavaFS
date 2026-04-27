@@ -13,6 +13,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Job {
 
+    public enum JobStatus {
+        OPEN,
+        CLOSED,
+        DELETED
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "job_id")
@@ -51,6 +57,10 @@ public class Job {
 
     @Column(name = "placement_drive_date", nullable = false)
     private LocalDate placementDriveDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private JobStatus status = JobStatus.OPEN;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
