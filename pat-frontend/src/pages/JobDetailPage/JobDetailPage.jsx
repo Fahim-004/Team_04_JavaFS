@@ -139,6 +139,12 @@ const JobDetailPage = () => {
 
           <div className="px-6 py-6">
 
+            {job.status && job.status !== "OPEN" && (
+              <div className="mb-4 rounded-lg px-4 py-3 text-sm" style={{ background: job.status === "CLOSED" ? "#fef3c7" : "#f3f4f6", color: job.status === "CLOSED" ? "#92400e" : "#6b7280" }}>
+                Applications are {job.status === "CLOSED" ? "closed" : "no longer available"} for this role.
+              </div>
+            )}
+
             {/* Key dates */}
             <div className="grid grid-cols-2 gap-4 mb-6 pb-6"
               style={{ borderBottom: "1px solid #f0f2f8" }}>
@@ -181,6 +187,7 @@ const JobDetailPage = () => {
                 onClick={() => setShowApply((prev) => !prev)}
                 className="h-10 px-6 text-sm rounded-lg font-medium text-white"
                 style={{ background: "#4c7ef0", border: "none" }}
+                disabled={job.status && job.status !== "OPEN"}
               >
                 {showApply ? "Cancel" : "Apply Now"}
               </button>

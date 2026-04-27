@@ -6,7 +6,7 @@ import {
   createRound,
   getJobRounds,
   updateRoundResult,
-  getJobApplicants,
+  getRoundsApplicants,
 } from "../../services/api";
 
 // Toast (same style as ProfilePage)
@@ -51,13 +51,61 @@ const RoundsManagerPage = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
+  const getErrorMessage = (err, fallback) => {
+    const data = err?.response?.data;
+    if (!data) return fallback;
+    if (typeof data === "string") return data;
+    return data.error || data.message || fallback;
+  };
+
+  const getRoundResultForApplicant = (app, round) => {
+    const result = (app.roundResults || []).find(
+      (r) => r.roundId === round.roundId || r.roundOrder === round.roundOrder
+    );
+    return result?.status || "NOT_UPDATED";
+  };
+
+  const isEligibleForRound = (app, round) => {
+    const previousRounds = rounds.filter((r) => r.roundOrder < round.roundOrder);
+    if (previousRounds.length === 0) return true;
+
+    return previousRounds.every((prevRound) => {
+      const prev = (app.roundResults || []).find(
+        (r) => r.roundId === prevRound.roundId || r.roundOrder === prevRound.roundOrder
+      );
+      return prev?.status === "PASSED";
+    });
+  };
+
+  const getIneligibilityReason = (app, round) => {
+    const previousRounds = rounds
+      .filter((r) => r.roundOrder < round.roundOrder)
+      .sort((a, b) => a.roundOrder - b.roundOrder);
+
+    for (const prevRound of previousRounds) {
+      const prev = (app.roundResults || []).find(
+        (r) => r.roundId === prevRound.roundId || r.roundOrder === prevRound.roundOrder
+      );
+
+      if (!prev) {
+        return `Awaiting result for Round ${prevRound.roundOrder} (${prevRound.roundName})`;
+      }
+
+      if (prev.status !== "PASSED") {
+        return `Did not clear Round ${prevRound.roundOrder} (${prevRound.roundName})`;
+      }
+    }
+
+    return "Not eligible for this round yet";
+  };
+
   // 🔄 Fetch data
   const fetchData = () => {
     getJobRounds(jobId)
       .then(res => setRounds(Array.isArray(res.data) ? res.data : []))
       .catch(() => setRounds([]));
 
-    getJobApplicants(jobId)
+    getRoundsApplicants(jobId)
       .then(res => setApplicants(Array.isArray(res.data) ? res.data : []))
       .catch(() => setApplicants([]));
   };
@@ -86,26 +134,21 @@ const RoundsManagerPage = () => {
 
       fetchData();
     } catch (err) {
-      showToast("error", err.response?.data || "Failed to add round");
+      showToast("error", getErrorMessage(err, "Failed to add round"));
     }
   };
 
   // 🔁 Update result
   const handleUpdate = async (applicationId, roundId, status) => {
-  try {
-    const res = await updateRoundResult(applicationId, roundId, status);
+    try {
+      await updateRoundResult(applicationId, roundId, status);
 
-    console.log("UPDATE RESPONSE:", res);
-
-    showToast("success", "Result updated");
-
-    fetchData();
-  } catch (err) {
-    console.error("UPDATE ERROR:", err);
-
-    showToast("error", err?.response?.data || "Update failed");
-  }
-};
+      showToast("success", "Result updated");
+      fetchData();
+    } catch (err) {
+      showToast("error", getErrorMessage(err, "Update failed"));
+    }
+  };
 
   return (
     <DashboardLayout title="Rounds Manager">
@@ -184,49 +227,96 @@ const RoundsManagerPage = () => {
               {round.roundName} (Order {round.roundOrder})
             </h3>
 
-            {/* 👥 Applicants */}
-            {applicants.length === 0 ? (
-              <p style={{ color: "#9ca3af" }}>No applicants found.</p>
-            ) : (
-              applicants.map((app) => (
-                <div
-                  key={app.applicationId}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "10px 0",
-                    borderBottom: "1px solid #f3f4f6",
-                  }}
-                >
-                  <span>{app.student?.fullName || "Unknown"}</span>
+            {(() => {
+              const eligibleApplicants = applicants.filter((app) =>
+                isEligibleForRound(app, round)
+              );
+              const ineligibleApplicants = applicants.filter((app) =>
+                !isEligibleForRound(app, round)
+              );
 
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    {["Passed", "Failed", "Pending"].map((status) => (
-                      <button
-                        key={status}
-                        onClick={() =>
-                          handleUpdate(
-                            app.applicationId,
-                            round.roundId,
-                            status
-                          )
-                        }
+              if (applicants.length === 0) {
+                return <p style={{ color: "#9ca3af" }}>No applicants found.</p>;
+              }
+
+              return (
+                <>
+                  {eligibleApplicants.length === 0 ? (
+                    <p style={{ color: "#9ca3af" }}>
+                      No eligible candidates for this round yet. Only candidates who passed preceding rounds are shown.
+                    </p>
+                  ) : (
+                    eligibleApplicants.map((app) => (
+                      <div
+                        key={app.applicationId}
                         style={{
-                          padding: "4px 10px",
-                          borderRadius: "6px",
-                          border: "1px solid #d1d5db",
-                          background: "#fff",
-                          cursor: "pointer",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          padding: "10px 0",
+                          borderBottom: "1px solid #f3f4f6",
                         }}
                       >
-                        {status}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))
-            )}
+                        <div>
+                          <span>{app.studentName || "Unknown"}</span>
+                          <p style={{ color: "#6b7280", fontSize: "12px", marginTop: "4px" }}>
+                            Status in this round: {getRoundResultForApplicant(app, round).replace("_", " ")}
+                          </p>
+                        </div>
+
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          {["Passed", "Failed"].map((status) => (
+                            <button
+                              key={status}
+                              onClick={() =>
+                                handleUpdate(
+                                  app.applicationId,
+                                  round.roundId,
+                                  status
+                                )
+                              }
+                              style={{
+                                padding: "4px 10px",
+                                borderRadius: "6px",
+                                border: "1px solid #d1d5db",
+                                background: "#fff",
+                                cursor: "pointer",
+                              }}
+                            >
+                              {status}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))
+                  )}
+
+                  {ineligibleApplicants.length > 0 ? (
+                    <div
+                      style={{
+                        marginTop: "12px",
+                        padding: "10px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid #fee2e2",
+                        background: "#fff7f7",
+                      }}
+                    >
+                      <p style={{ color: "#991b1b", fontSize: "12px", fontWeight: 600, marginBottom: "6px" }}>
+                        Ineligible for this round
+                      </p>
+                      {ineligibleApplicants.map((app) => (
+                        <p
+                          key={`ineligible-${round.roundId}-${app.applicationId}`}
+                          style={{ color: "#7f1d1d", fontSize: "12px", marginBottom: "4px" }}
+                        >
+                          {app.studentName || "Unknown"}: {getIneligibilityReason(app, round)}
+                        </p>
+                      ))}
+                    </div>
+                  ) : null}
+                </>
+              );
+            })()}
           </div>
         ))
       )}

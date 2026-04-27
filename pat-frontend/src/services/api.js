@@ -63,6 +63,10 @@ export const getStudentResumes = () => api.get("/students/resumes");
 export const postJob          = (data)   => api.post("/jobs", data);
 export const getEmployerJobs  = ()       => api.get("/employers/jobs");
 export const getJobApplicants = (jobId)  => api.get(`/jobs/${jobId}/applicants`);
+export const getRoundsApplicants = (jobId) => api.get(`/jobs/${jobId}/rounds/applicants`);
+export const updateJob = (jobId, data) => api.put(`/employers/jobs/${jobId}`, data);
+export const deleteJob = (jobId) => api.delete(`/employers/jobs/${jobId}`);
+export const stopJobIntake = (jobId) => api.put(`/employers/jobs/${jobId}/stop-intake`);
 
 
 // ── Employer Profile ───────────────────────────────────────────

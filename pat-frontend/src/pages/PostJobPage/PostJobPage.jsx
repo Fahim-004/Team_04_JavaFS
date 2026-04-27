@@ -1,14 +1,15 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
-import { postJob } from "../../services/api";
-import { useEffect } from "react";
-import { getEmployerProfile } from "../../services/api";
+import { getJobById, getEmployerProfile, postJob, updateJob } from "../../services/api";
 import { isEmployerProfileComplete } from "../../utils/ProfileUtils";
 
 const PostJobPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const editJobId = location.state?.jobId;
   const [isApproved, setIsApproved] = useState(true);
+  const [isEditMode, setIsEditMode] = useState(Boolean(editJobId));
   useEffect(() => {
   const checkProfile = async () => {
     try {
@@ -33,6 +34,34 @@ setIsApproved(profile.approvedStatus);
 
   checkProfile();
 }, []);
+
+  useEffect(() => {
+    if (!editJobId) return;
+
+    const loadJob = async () => {
+      try {
+        const res = await getJobById(editJobId);
+        const job = res.data;
+        setIsEditMode(true);
+        setFormData({
+          jobTitle: job.jobTitle || "",
+          salaryPackage: job.salaryPackage || "",
+          applicationDeadline: job.applicationDeadline || "",
+          placementDriveDate: job.placementDriveDate || "",
+          jobDescription: job.jobDescription || "",
+          jobLocation: job.jobLocation || "",
+          minCgpa: job.minCgpa ?? "",
+          eligibleBranches: job.eligibleBranches || "",
+          maxBacklogs: job.maxBacklogs ?? "",
+          passingYear: job.passingYear ?? "",
+        });
+      } catch (err) {
+        setBannerError(err.response?.data?.error || "Failed to load job for editing");
+      }
+    };
+
+    loadJob();
+  }, [editJobId]);
 
   const [formData, setFormData] = useState({
     jobTitle: "",
@@ -66,9 +95,13 @@ setIsApproved(profile.approvedStatus);
     setLoading(true);
 
     try {
-      await postJob(formData);
+      if (isEditMode) {
+        await updateJob(editJobId, formData);
+      } else {
+        await postJob(formData);
+      }
 
-      alert("Job posted successfully!");
+      alert(isEditMode ? "Job updated successfully!" : "Job posted successfully!");
 
       navigate("/employer/dashboard");
 
@@ -90,7 +123,7 @@ setIsApproved(profile.approvedStatus);
   };
 
   return (
-    <DashboardLayout title="Post Job">
+    <DashboardLayout title={isEditMode ? "Edit Job" : "Post Job"}>
 
       <div className="max-w-5xl">
 
@@ -312,7 +345,7 @@ setIsApproved(profile.approvedStatus);
                 className="px-6 py-2 rounded-lg text-white"
                 style={{ background: "#4c7ef0" }}
               >
-                {loading ? "Posting..." : "Post Job"}
+                {loading ? (isEditMode ? "Updating..." : "Posting...") : (isEditMode ? "Update Job" : "Post Job")}
               </button>
             </div>
 
