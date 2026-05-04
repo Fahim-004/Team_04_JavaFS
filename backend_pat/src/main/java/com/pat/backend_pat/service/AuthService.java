@@ -35,7 +35,7 @@ public class AuthService {
         User user = new User();
         user.setEmail(request.getEmail());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setRole(User.Role.valueOf(request.getRole().toUpperCase()));
+        user.setRole(User.Role.valueOf(request.getRole().trim().toLowerCase(java.util.Locale.ROOT)));
 
         User savedUser = userRepository.save(user);
 
