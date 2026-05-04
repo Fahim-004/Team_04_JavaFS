@@ -1,20 +1,31 @@
-import Sidebar from "../components/Sidebar/Sidebar";
-import DashboardNavbar from "../components/DashboardNavbar/DashboardNavbar";
+import { useState } from "react";
+import StudentSidebar from "../components/Sidebar/StudentSidebar";
+import EmployerSidebar from "../components/EmployerSidebar/EmployerSidebar";
+import DashboardNavbar  from "../components/DashboardNavbar/DashboardNavbar";
+import AdminSidebar from "../components/AdminSidebar/AdminSidebar";
 
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = ({ children, title }) => {
+  const [collapsed, setCollapsed] = useState(false);
+
+  const role = (localStorage.getItem("role") || "").toLowerCase();
+
   return (
-    <div className="flex">
+    <div className="flex" style={{ height: "100vh", overflow: "hidden", background: "#f0f2f8" }}>
+      {role === "admin" ? (
+        <AdminSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+      ) : role === "employer" ? (
+        <EmployerSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+      ) : (
+        <StudentSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+      )}
 
-      <Sidebar />
+      {/* Right column is a flex column that fills remaining width */}
+      <div className="flex flex-col" style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+        <DashboardNavbar title={title} collapsed={collapsed} />
 
-      <div className="flex-1 bg-gray-100 min-h-screen">
-
-        <DashboardNavbar />
-
-        <div className="p-8">
+        <main style={{ flex: 1, overflowY: "auto", padding: "28px 32px" }}>
           {children}
-        </div>
-
+        </main>
       </div>
 
     </div>
