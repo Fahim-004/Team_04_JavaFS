@@ -72,28 +72,29 @@ const ProfilePage = () => {
   const [resumeFile, setResumeFile] = useState(null);
 
   useEffect(() => {
-    // Read email from localStorage — saved by AuthContext on login
-    const stored = localStorage.getItem("userEmail") || "";
-    setEmail(stored);
-
+    
     getStudentProfile()
-      .then((res) => {
-        if (res.data) {
-          setForm({
-            fullName:    res.data.fullName    || "",
-            phoneNumber: res.data.phoneNumber || "",
-            usn:         res.data.usn         || "",
-            branch:      res.data.branch      || "",
-            cgpa:        res.data.cgpa        || "",
-            backlogCount: res.data.backlogCount || "",
-            passingYear: res.data.passingYear || "",
-            skills:      res.data.skills      || "",
-            projects:    res.data.projects    || "",
-            linkedinUrl: res.data.linkedinUrl || "",
-            githubUrl:   res.data.githubUrl   || "",
-          });
-        }
-      })
+  .then((res) => {
+    if (res.data) {
+
+      // ✅ FIX: pull email from nested user object
+      setEmail(res.data.user?.email || "");
+
+      setForm({
+        fullName: res.data.fullName || "",
+        phoneNumber: res.data.phoneNumber || "",
+        usn: res.data.usn || "",
+        branch: res.data.branch || "",
+        cgpa: res.data.cgpa || "",
+        backlogCount: res.data.backlogCount || "",
+        passingYear: res.data.passingYear || "",
+        skills: res.data.skills || "",
+        projects: res.data.projects || "",
+        linkedinUrl: res.data.linkedinUrl || "",
+        githubUrl: res.data.githubUrl || "",
+      });
+    }
+  })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
