@@ -1,6 +1,6 @@
 CREATE DATABASE IF NOT EXISTS pat_system;
 
- USE pat_system;
+USE pat_system;
 
 CREATE TABLE users (
 user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -12,10 +12,10 @@ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
 CREATE TABLE students (
 student_id INT AUTO_INCREMENT PRIMARY KEY,
-user_id INT UNIQUE NOT NULL,
-full_name VARCHAR(255) NOT NULL,
+user_id INT UNIQUE,
+full_name VARCHAR(255),
 phone_number VARCHAR(20),
-usn VARCHAR(50) ,
+usn VARCHAR(50),
 branch VARCHAR(100),
 cgpa DECIMAL(3,2),
 backlog_count INT,
@@ -30,11 +30,11 @@ FOREIGN KEY (user_id) REFERENCES users(user_id)
 
 CREATE TABLE employers (
 employer_id INT AUTO_INCREMENT PRIMARY KEY,
-user_id INT UNIQUE,
-company_name VARCHAR(255),
-company_description TEXT,
-approved_status BOOLEAN DEFAULT FALSE,
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+user_id INT UNIQUE NOT NULL,
+company_name VARCHAR(255) NOT NULL,
+company_description TEXT NOT NULL,
+approved_status BOOLEAN DEFAULT FALSE NOT NULL,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
@@ -42,9 +42,9 @@ CREATE TABLE jobs (
 job_id INT AUTO_INCREMENT PRIMARY KEY,
 employer_id INT NOT NULL,
 job_title VARCHAR(255) NOT NULL,
-job_description TEXT,
+job_description VARCHAR(255) NOT NULL,
 salary_package VARCHAR(100) NOT NULL,
-job_location VARCHAR(100),
+job_location VARCHAR(100) NOT NULL,
 min_cgpa DECIMAL(3,2),
 eligible_branches TEXT,
 max_backlogs INT,
@@ -119,4 +119,3 @@ shortlisted_count INT DEFAULT 0,
 interviews_given INT DEFAULT 0,
 FOREIGN KEY (student_id) REFERENCES students(student_id)
 );
-
