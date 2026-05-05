@@ -20,4 +20,7 @@ public class StudentApplicationViewDTO {
     private String currentRoundName;
     private Integer currentRoundOrder;
     private String currentRoundResult;
+    private String jobStatus;
+    private String jobAvailabilityLabel;
+    private LocalDateTime lastUpdatedAt;
 }

@@ -110,10 +110,13 @@ const MyApplicationsPage = () => {
             </p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {applications.map((app) => (
+              {applications
+                .slice()
+                .sort((a, b) => new Date(b.appliedAt) - new Date(a.appliedAt))
+                .map((app) => (
                 <div
                   key={app.applicationId}
-                  className="rounded-xl px-5 py-4"
+                  className={`rounded-xl px-5 py-4 ${app.jobStatus === "DELETED" ? "opacity-60" : ""}`}
                   style={{ border: "1px solid #e5e7f0", background: "#fafbff" }}
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -140,7 +143,23 @@ const MyApplicationsPage = () => {
                         </p>
                       ) : null}
                     </div>
-                    <StatusBadge status={app.applicationStatus} />
+                    <div className="flex items-center gap-2">
+                      {app.jobStatus && app.jobStatus !== "OPEN" ? (
+                        <span
+                          className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                          style={
+                            app.jobStatus === "DELETED"
+                              ? { background: "#fee2e2", color: "#991b1b" }
+                              : app.jobStatus === "CLOSED"
+                                ? { background: "#fef3c7", color: "#92400e" }
+                                : { background: "#f3f4f6", color: "#374151" }
+                          }
+                        >
+                          {app.jobAvailabilityLabel}
+                        </span>
+                      ) : null}
+                      <StatusBadge status={app.applicationStatus} />
+                    </div>
                   </div>
                   <p className="text-xs mt-3" style={{ color: "#9ca3af" }}>
                     Applied on {formatDate(app.appliedAt)}

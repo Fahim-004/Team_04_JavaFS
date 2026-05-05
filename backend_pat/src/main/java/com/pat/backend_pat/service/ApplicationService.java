@@ -81,6 +81,9 @@ public class ApplicationService {
                 List<Application> applications = applicationRepository.findByStudent(student);
 
                 return applications.stream().map(application -> {
+                        Job job = application.getJob();
+                        Job.JobStatus status = job.getStatus();
+
                         RoundResult latestRoundResult = roundResultRepository
                                         .findTopByApplicationOrderByRoundRoundOrderDescUpdatedAtDesc(application)
                                         .orElse(null);
@@ -95,16 +98,29 @@ public class ApplicationService {
                                         ? latestRoundResult.getStatus().name()
                                         : null;
 
-                        return new StudentApplicationViewDTO(
-                                        application.getApplicationId(),
-                                        application.getJob().getJobTitle(),
-                                        application.getJob().getEmployer().getCompanyName(),
-                                        application.getJob().getSalaryPackage(),
-                                        application.getStatus(),
-                                        application.getAppliedAt(),
-                                        roundName,
-                                        roundOrder,
-                                        roundResult);
+                        StudentApplicationViewDTO dto = new StudentApplicationViewDTO();
+                        dto.setApplicationId(application.getApplicationId());
+                        dto.setJobTitle(job.getJobTitle());
+                        dto.setCompanyName(job.getEmployer().getCompanyName());
+                        dto.setSalaryPackage(job.getSalaryPackage());
+                        dto.setApplicationStatus(application.getStatus());
+                        dto.setAppliedAt(application.getAppliedAt());
+                        dto.setLastUpdatedAt(
+                                        latestRoundResult != null
+                                                        ? latestRoundResult.getUpdatedAt()
+                                                        : application.getAppliedAt()
+                        );
+                        dto.setCurrentRoundName(roundName);
+                        dto.setCurrentRoundOrder(roundOrder);
+                        dto.setCurrentRoundResult(roundResult);
+                        dto.setJobStatus(status.name());
+                        dto.setJobAvailabilityLabel(
+                                        status == Job.JobStatus.OPEN
+                                                        ? "Intake Open"
+                                                        : status == Job.JobStatus.CLOSED
+                                                                        ? "Intake Closed"
+                                                                        : "Job Removed");
+                        return dto;
                 }).collect(Collectors.toList());
         }
 
