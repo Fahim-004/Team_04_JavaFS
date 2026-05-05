@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LandingPage        from "../pages/LandingPage/LandingPage";
 import LoginPage          from "../pages/LoginPage/LoginPage";
 import RegisterPage       from "../pages/RegisterPage/RegisterPage";
+import ForgotPassword     from "../pages/ForgotPassword";
+import ResetPassword      from "../pages/ResetPassword";
 // Student Pages
 import Dashboard          from "../pages/Dashboard/Dashboard";
 import JobListPage        from "../pages/JobListPage/JobListPage";
@@ -33,6 +35,8 @@ const AppRoutes = () => {
         <Route path="/"               element={<LandingPage />} /> {/*Landing Page*/} 
         <Route path="/login"          element={<LoginPage />} /> {/*Login Page*/}
         <Route path="/register"       element={<RegisterPage />} /> {/*Register Page*/}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         
         <Route path="/dashboard" element={
           <StudentRoutes>

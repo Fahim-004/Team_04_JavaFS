@@ -113,6 +113,12 @@ const LoginPage = () => {
               />
             </div>
 
+            <div className="mb-6 text-right">
+              <Link to="/forgot-password" className="text-blue-600 hover:underline text-sm">
+                Forgot Password?
+              </Link>
+            </div>
+
             <button
               type="submit"
               disabled={loading}

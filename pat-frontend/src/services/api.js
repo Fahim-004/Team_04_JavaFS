@@ -107,4 +107,11 @@ export const updateRoundResult = (applicationId, roundId, status) =>
     },
   });
 
+// ── Auth: Forgot/Reset Password ────────────────────────────────
+export const forgotPassword = async (email) =>
+  api.post("/auth/forgot-password", null, { params: { email } });
+
+export const resetPassword = async (token, newPassword) =>
+  api.post("/auth/reset-password", null, { params: { token, newPassword } });
+
 export default api;
