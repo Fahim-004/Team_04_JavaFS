@@ -1,5 +1,6 @@
 package com.pat.backend_pat.controller;
 
+import com.pat.backend_pat.dto.JobUpdateDTO;
 import com.pat.backend_pat.service.ApplicationService;
 import com.pat.backend_pat.service.JobService;
 
@@ -36,6 +37,16 @@ public class JobController {
                         @PathVariable Integer jobId) {
                 return ResponseEntity.ok(
                                 jobService.getJobById(jobId));
+        }
+
+        // PATCH job by ID (partial update, employer only, ownership enforced)
+        @PatchMapping("/jobs/{jobId}")
+        public ResponseEntity<?> patchJobById(
+                        @PathVariable Integer jobId,
+                        @RequestBody JobUpdateDTO dto,
+                        Authentication auth) {
+                String email = auth.getName();
+                return ResponseEntity.ok(jobService.patchJobById(jobId, email, dto));
         }
 
         // APPLY for job

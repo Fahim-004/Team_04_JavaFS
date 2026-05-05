@@ -1,5 +1,6 @@
 package com.pat.backend_pat.service;
 
+import com.pat.backend_pat.dto.JobUpdateDTO;
 import com.pat.backend_pat.dto.RoundResultViewDTO;
 import com.pat.backend_pat.dto.RoundsManagerApplicantDTO;
 import com.pat.backend_pat.entity.Application;
@@ -75,13 +76,60 @@ public class JobService {
     public Job getJobById(Integer jobId) {
 
         Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found with id: " + jobId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found"));
 
         if (job.getStatus() == Job.JobStatus.DELETED) {
-            throw new RuntimeException("Job not found with id: " + jobId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found");
         }
 
         return job;
+    }
+
+    public Job patchJobById(Integer jobId, String email, JobUpdateDTO dto) {
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found"));
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        if (user.getRole() != User.Role.employer) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only employers can update jobs");
+        }
+
+        Employer employer = employerRepository.findByUserUserId(user.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Employer profile not found"));
+
+        if (job.getEmployer() == null || job.getEmployer().getEmployerId() == null
+                || !job.getEmployer().getEmployerId().equals(employer.getEmployerId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this job");
+        }
+
+        if (dto.getJobTitle() != null) {
+            job.setJobTitle(dto.getJobTitle());
+        }
+        if (dto.getJobDescription() != null) {
+            job.setJobDescription(dto.getJobDescription());
+        }
+        if (dto.getSalaryPackage() != null) {
+            job.setSalaryPackage(dto.getSalaryPackage());
+        }
+        if (dto.getJobLocation() != null) {
+            job.setJobLocation(dto.getJobLocation());
+        }
+        if (dto.getMinCgpa() != null) {
+            job.setMinCgpa(dto.getMinCgpa());
+        }
+        if (dto.getEligibleBranches() != null) {
+            job.setEligibleBranches(dto.getEligibleBranches());
+        }
+        if (dto.getMaxBacklogs() != null) {
+            job.setMaxBacklogs(dto.getMaxBacklogs());
+        }
+        if (dto.getPassingYear() != null) {
+            job.setPassingYear(dto.getPassingYear());
+        }
+
+        return jobRepository.save(job);
     }
 
     public List<Application> getJobApplicants(Integer jobId, String email) {
