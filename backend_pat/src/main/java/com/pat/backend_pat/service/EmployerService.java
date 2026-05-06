@@ -5,18 +5,17 @@ import com.pat.backend_pat.dto.EmployerProfileDTO;
 import com.pat.backend_pat.entity.Employer;
 import com.pat.backend_pat.entity.Job;
 import com.pat.backend_pat.entity.User;
+import com.pat.backend_pat.exception.AccessDeniedException;
+import com.pat.backend_pat.exception.ResourceNotFoundException;
 import com.pat.backend_pat.exception.ValidationException;
 import com.pat.backend_pat.repository.EmployerRepository;
 import com.pat.backend_pat.repository.JobRepository;
 import com.pat.backend_pat.repository.UserRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class EmployerService {
@@ -39,10 +38,10 @@ public class EmployerService {
 
     private User validateEmployerUser(Integer userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (user.getRole() != User.Role.employer) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only employer accounts can access this resource");
+            throw new AccessDeniedException("Only employer accounts can access this resource");
         }
 
         return user;
@@ -50,17 +49,17 @@ public class EmployerService {
 
     private Employer getEmployerOwnedBy(Integer userId) {
         return employerRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new ValidationException("Employer profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Employer profile not found"));
     }
 
     private Job getOwnedJob(Integer userId, Integer jobId) {
         Employer employer = getEmployerOwnedBy(userId);
 
         Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
 
         if (job.getEmployer() == null || !job.getEmployer().getEmployerId().equals(employer.getEmployerId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to manage this job");
+            throw new AccessDeniedException("You are not authorized to manage this job");
         }
 
         return job;
@@ -96,8 +95,7 @@ public class EmployerService {
         Employer employer = getEmployerOwnedBy(userId);
 
         if (!employer.getApprovedStatus()) {
-            throw new ValidationException(
-                    "Your employer account is pending admin approval. You cannot post jobs until approved.");
+            throw new ValidationException("Your employer account is pending admin approval. You cannot post jobs until approved.");
         }
 
         jobValidationService.validateDates(dto.getApplicationDeadline(), dto.getPlacementDriveDate());
@@ -180,43 +178,43 @@ public class EmployerService {
 
     public Employer getProfileByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return getProfile(user.getUserId());
     }
 
     public Employer updateProfileByEmail(String email, EmployerProfileDTO dto) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return updateProfile(user.getUserId(), dto);
     }
 
     public Job postJobByEmail(String email, CreateJobDTO dto) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return postJob(user.getUserId(), dto);
     }
 
     public Job updateJobByEmail(String email, Integer jobId, CreateJobDTO dto) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return updateJob(user.getUserId(), jobId, dto);
     }
 
     public Job stopJobIntakeByEmail(String email, Integer jobId) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return stopJobIntake(user.getUserId(), jobId);
     }
 
     public void deleteJobByEmail(String email, Integer jobId) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         deleteJob(user.getUserId(), jobId);
     }
 
     public List<Job> getEmployerJobsByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return getEmployerJobs(user.getUserId());
     }
 }

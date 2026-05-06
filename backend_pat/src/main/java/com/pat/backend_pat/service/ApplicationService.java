@@ -1,13 +1,22 @@
 package com.pat.backend_pat.service;
 
 import com.pat.backend_pat.dto.StudentApplicationViewDTO;
-import com.pat.backend_pat.entity.*;
+import com.pat.backend_pat.entity.Application;
 import com.pat.backend_pat.entity.Application.ApplicationStatus;
-import com.pat.backend_pat.repository.*;
+import com.pat.backend_pat.entity.Job;
+import com.pat.backend_pat.entity.Resume;
+import com.pat.backend_pat.entity.RoundResult;
+import com.pat.backend_pat.entity.Student;
+import com.pat.backend_pat.entity.User;
+import com.pat.backend_pat.exception.ResourceNotFoundException;
+import com.pat.backend_pat.repository.ApplicationRepository;
+import com.pat.backend_pat.repository.JobRepository;
+import com.pat.backend_pat.repository.ResumeRepository;
+import com.pat.backend_pat.repository.RoundResultRepository;
+import com.pat.backend_pat.repository.StudentRepository;
+import com.pat.backend_pat.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,27 +41,25 @@ public class ApplicationService {
         private RoundResultRepository roundResultRepository;
 
         public Application applyForJob(Integer userId, Integer jobId, Integer resumeId) {
-
                 Student student = studentRepository.findByUserUserId(userId)
-                                .orElseThrow(() -> new RuntimeException("Student profile not found"));
+                                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
 
                 Job job = jobRepository.findById(jobId)
-                                .orElseThrow(() -> new RuntimeException("Job not found"));
+                                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
 
                 if (job.getStatus() != Job.JobStatus.OPEN) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                        "Applications are closed for this job");
+                        throw new IllegalArgumentException("Applications are closed for this job");
                 }
 
                 Resume resume = resumeRepository.findById(resumeId)
-                                .orElseThrow(() -> new RuntimeException("Resume not found"));
+                                .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
 
                 if (!resume.getStudent().getStudentId().equals(student.getStudentId())) {
-                        throw new RuntimeException("Resume does not belong to this student");
+                        throw new IllegalArgumentException("Resume does not belong to this student");
                 }
 
                 applicationRepository.findByStudentAndJob(student, job).ifPresent(a -> {
-                        throw new RuntimeException("Already applied");
+                        throw new IllegalArgumentException("Already applied");
                 });
 
                 eligibilityService.checkEligibility(student, job);
@@ -61,22 +68,17 @@ public class ApplicationService {
                 application.setStudent(student);
                 application.setJob(job);
                 application.setResume(resume);
-
-                // ✅ ENUM FIX
                 application.setStatus(ApplicationStatus.Applied);
 
                 Application saved = applicationRepository.save(application);
 
-                notificationService.createNotification(
-                                userId,
-                                "Application submitted successfully");
-
+                notificationService.createNotification(userId, "Application submitted successfully");
                 return saved;
         }
 
         public List<StudentApplicationViewDTO> getStudentApplications(Integer userId) {
                 Student student = studentRepository.findByUserUserId(userId)
-                                .orElseThrow(() -> new RuntimeException("Student not found"));
+                                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
                 List<Application> applications = applicationRepository.findByStudent(student);
 
@@ -88,15 +90,9 @@ public class ApplicationService {
                                         .findTopByApplicationOrderByRoundRoundOrderDescUpdatedAtDesc(application)
                                         .orElse(null);
 
-                        String roundName = latestRoundResult != null
-                                        ? latestRoundResult.getRound().getRoundName()
-                                        : null;
-                        Integer roundOrder = latestRoundResult != null
-                                        ? latestRoundResult.getRound().getRoundOrder()
-                                        : null;
-                        String roundResult = latestRoundResult != null
-                                        ? latestRoundResult.getStatus().name()
-                                        : null;
+                        String roundName = latestRoundResult != null ? latestRoundResult.getRound().getRoundName() : null;
+                        Integer roundOrder = latestRoundResult != null ? latestRoundResult.getRound().getRoundOrder() : null;
+                        String roundResult = latestRoundResult != null ? latestRoundResult.getStatus().name() : null;
 
                         StudentApplicationViewDTO dto = new StudentApplicationViewDTO();
                         dto.setApplicationId(application.getApplicationId());
@@ -105,28 +101,21 @@ public class ApplicationService {
                         dto.setSalaryPackage(job.getSalaryPackage());
                         dto.setApplicationStatus(application.getStatus());
                         dto.setAppliedAt(application.getAppliedAt());
-                        dto.setLastUpdatedAt(
-                                        latestRoundResult != null
-                                                        ? latestRoundResult.getUpdatedAt()
-                                                        : application.getAppliedAt()
-                        );
+                        dto.setLastUpdatedAt(latestRoundResult != null ? latestRoundResult.getUpdatedAt() : application.getAppliedAt());
                         dto.setCurrentRoundName(roundName);
                         dto.setCurrentRoundOrder(roundOrder);
                         dto.setCurrentRoundResult(roundResult);
                         dto.setJobStatus(status.name());
                         dto.setJobAvailabilityLabel(
-                                        status == Job.JobStatus.OPEN
-                                                        ? "Intake Open"
-                                                        : status == Job.JobStatus.CLOSED
-                                                                        ? "Intake Closed"
-                                                                        : "Job Removed");
+                                        status == Job.JobStatus.OPEN ? "Intake Open"
+                                                        : status == Job.JobStatus.CLOSED ? "Intake Closed" : "Job Removed");
                         return dto;
                 }).collect(Collectors.toList());
         }
 
         public Integer getUserIdFromEmail(String email) {
                 User user = userRepository.findByEmail(email)
-                                .orElseThrow(() -> new RuntimeException("User not found"));
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
                 return user.getUserId();
         }
 }

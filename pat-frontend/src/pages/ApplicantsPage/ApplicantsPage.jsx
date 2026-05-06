@@ -2,15 +2,17 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { getJobApplicants } from "../../services/api";
+import { handleApiError } from "../../utils/handleApiError";
 
 const ApplicantsPage = () => {
   const { jobId } = useParams();
   const [applicants, setApplicants] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     getJobApplicants(jobId)
       .then((res) => setApplicants(res.data))
-      .catch(() => {});
+      .catch((error) => setError(handleApiError(error)));
   }, [jobId]);
 
   const getStatusColor = (status) => {
@@ -24,6 +26,11 @@ const ApplicantsPage = () => {
     <DashboardLayout title="Applicants">
 
       {/* Table container */}
+      {error ? (
+        <div className="mb-4 rounded-lg px-4 py-3 text-sm" style={{ background: "#fef2f2", color: "#991b1b" }}>
+          {error}
+        </div>
+      ) : null}
       <div
         className="rounded-xl overflow-hidden"
         style={{ background: "#fff", border: "1px solid #e5e7f0" }}

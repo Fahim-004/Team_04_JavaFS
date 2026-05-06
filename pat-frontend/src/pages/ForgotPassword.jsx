@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { forgotPassword } from "../services/api";
+import { handleApiError } from "../utils/handleApiError";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -21,8 +22,8 @@ const ForgotPassword = () => {
     try {
       await forgotPassword(email);
       setMessage("If the email exists, a reset link has been sent.");
-    } catch (err) {
-      setError(err?.response?.data?.message || "Failed to send reset email.");
+    } catch (error) {
+      setError(error.message || handleApiError(error));
     } finally {
       setLoading(false);
     }

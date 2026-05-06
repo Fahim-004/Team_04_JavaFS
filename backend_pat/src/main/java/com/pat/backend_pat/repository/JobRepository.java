@@ -12,6 +12,8 @@ public interface JobRepository extends JpaRepository<Job, Integer> {
 
     List<Job> findByEmployer(Employer employer);
 
+    long countByStatus(Job.JobStatus status);
+
     @Query("SELECT j FROM Job j WHERE " +
            "(:branch IS NULL OR j.eligibleBranches LIKE %:branch%) AND " +
            "(:minCgpa IS NULL OR j.minCgpa IS NULL OR j.minCgpa <= :minCgpa)")

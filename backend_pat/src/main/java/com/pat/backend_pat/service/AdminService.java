@@ -1,9 +1,14 @@
 package com.pat.backend_pat.service;
 
 import com.pat.backend_pat.dto.StatisticsDTO;
+import com.pat.backend_pat.entity.Application;
 import com.pat.backend_pat.entity.Employer;
-import com.pat.backend_pat.entity.*;
-import com.pat.backend_pat.repository.*;
+import com.pat.backend_pat.entity.Student;
+import com.pat.backend_pat.exception.ResourceNotFoundException;
+import com.pat.backend_pat.repository.ApplicationRepository;
+import com.pat.backend_pat.repository.EmployerRepository;
+import com.pat.backend_pat.repository.JobRepository;
+import com.pat.backend_pat.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -26,16 +31,14 @@ public class AdminService {
 
     public Employer approveEmployer(Integer employerId) {
         Employer employer = employerRepository.findById(employerId)
-            .orElseThrow(() -> new RuntimeException(
-                "Employer not found with id: " + employerId));
+            .orElseThrow(() -> new ResourceNotFoundException("Employer not found with id: " + employerId));
         employer.setApprovedStatus(true);
         return employerRepository.save(employer);
     }
 
     public void removeEmployer(Integer employerId) {
         Employer employer = employerRepository.findById(employerId)
-            .orElseThrow(() -> new RuntimeException(
-                "Employer not found with id: " + employerId));
+            .orElseThrow(() -> new ResourceNotFoundException("Employer not found with id: " + employerId));
         employerRepository.delete(employer);
     }
 

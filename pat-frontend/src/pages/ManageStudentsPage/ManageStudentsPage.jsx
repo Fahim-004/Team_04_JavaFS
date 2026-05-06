@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { getAdminStudents } from "../../services/api";
+import { handleApiError } from "../../utils/handleApiError";
 
 const ManageStudentsPage = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     getAdminStudents()
       .then((res) => setStudents(res.data || []))
-      .catch(() => {})
+      .catch((error) => setError(handleApiError(error)))
       .finally(() => setLoading(false));
   }, []);
 
@@ -27,6 +29,12 @@ const ManageStudentsPage = () => {
           View all registered students.
         </p>
       </div>
+
+      {error ? (
+        <div className="mb-4 rounded-lg px-4 py-3 text-sm" style={{ background: "#fef2f2", color: "#991b1b" }}>
+          {error}
+        </div>
+      ) : null}
 
       {/* Card */}
       <div

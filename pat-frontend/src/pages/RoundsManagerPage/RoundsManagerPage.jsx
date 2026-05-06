@@ -8,6 +8,7 @@ import {
   updateRoundResult,
   getRoundsApplicants,
 } from "../../services/api";
+import { handleApiError } from "../../utils/handleApiError";
 
 // Toast (same style as ProfilePage)
 const Toast = ({ toast }) => {
@@ -51,12 +52,7 @@ const RoundsManagerPage = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const getErrorMessage = (err, fallback) => {
-    const data = err?.response?.data;
-    if (!data) return fallback;
-    if (typeof data === "string") return data;
-    return data.error || data.message || fallback;
-  };
+  const getErrorMessage = (error, fallback) => error?.message || handleApiError(error) || fallback;
 
   const getRoundResultForApplicant = (app, round) => {
     const result = (app.roundResults || []).find(
@@ -102,12 +98,18 @@ const RoundsManagerPage = () => {
   // 🔄 Fetch data
   const fetchData = () => {
     getJobRounds(jobId)
-      .then(res => setRounds(Array.isArray(res.data) ? res.data : []))
-      .catch(() => setRounds([]));
+      .then((res) => setRounds(Array.isArray(res.data) ? res.data : []))
+      .catch((error) => {
+        setRounds([]);
+        setToast({ type: "error", msg: getErrorMessage(error, "Failed to load rounds") });
+      });
 
     getRoundsApplicants(jobId)
-      .then(res => setApplicants(Array.isArray(res.data) ? res.data : []))
-      .catch(() => setApplicants([]));
+      .then((res) => setApplicants(Array.isArray(res.data) ? res.data : []))
+      .catch((error) => {
+        setApplicants([]);
+        setToast({ type: "error", msg: getErrorMessage(error, "Failed to load applicants") });
+      });
   };
 
   useEffect(() => {
@@ -133,8 +135,8 @@ const RoundsManagerPage = () => {
       setRoundOrder("");
 
       fetchData();
-    } catch (err) {
-      showToast("error", getErrorMessage(err, "Failed to add round"));
+    } catch (error) {
+      showToast("error", getErrorMessage(error, "Failed to add round"));
     }
   };
 
@@ -145,8 +147,8 @@ const RoundsManagerPage = () => {
 
       showToast("success", "Result updated");
       fetchData();
-    } catch (err) {
-      showToast("error", getErrorMessage(err, "Update failed"));
+    } catch (error) {
+      showToast("error", getErrorMessage(error, "Update failed"));
     }
   };
 

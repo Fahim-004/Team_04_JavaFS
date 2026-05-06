@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { getAllJobs } from "../../services/api";
+import { handleApiError } from "../../utils/handleApiError";
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "—";
@@ -13,6 +14,7 @@ const formatDate = (dateStr) => {
 const JobListPage = () => {
   const [jobs, setJobs]               = useState([]);
   const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState("");
   const [branchFilter, setBranchFilter] = useState("");
   const [cgpaFilter, setCgpaFilter]   = useState("");
   const navigate = useNavigate();
@@ -21,7 +23,7 @@ const JobListPage = () => {
     setLoading(true);
     getAllJobs(branch || null, cgpa || null)
       .then((res) => setJobs(res.data || []))
-      .catch(() => {})
+      .catch((error) => setError(handleApiError(error)))
       .finally(() => setLoading(false));
   };
 
@@ -101,6 +103,11 @@ const JobListPage = () => {
 
       {/* Job cards */}
       <div style={{ maxWidth: "780px" }}>
+        {error ? (
+          <div className="mb-4 rounded-lg px-4 py-3 text-sm" style={{ background: "#fef2f2", color: "#991b1b" }}>
+            {error}
+          </div>
+        ) : null}
         {loading ? (
           <p className="text-center py-12 text-sm" style={{ color: "#9ca3af" }}>
             Loading jobs...

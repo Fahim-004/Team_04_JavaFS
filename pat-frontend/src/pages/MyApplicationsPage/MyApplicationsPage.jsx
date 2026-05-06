@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { getMyApplications } from "../../services/api";
+import { handleApiError } from "../../utils/handleApiError";
 
 // const STATUS_STYLES = {
 //   Applied:     { background: "#eff6ff", color: "#1d4ed8" },
@@ -56,8 +57,8 @@ const MyApplicationsPage = () => {
   useEffect(() => {
     getMyApplications()
       .then((res) => setApplications(res.data || []))
-      .catch((err) => {
-        setError(err?.response?.data?.error || "Failed to load applications");
+      .catch((error) => {
+        setError(error.message || handleApiError(error));
       })
       .finally(() => setLoading(false));
   }, []);

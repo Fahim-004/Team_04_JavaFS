@@ -5,6 +5,7 @@ import {
   approveEmployer,
   removeEmployer,
 } from "../../services/api";
+import { handleApiError } from "../../utils/handleApiError";
 
 // Toast (same pattern as ProfilePage)
 const Toast = ({ toast }) => {
@@ -29,11 +30,12 @@ const ManageEmployersPage = () => {
   const [employers, setEmployers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     getAdminEmployers()
       .then((res) => setEmployers(res.data || []))
-      .catch(() => {})
+      .catch((error) => setError(error.message || handleApiError(error)))
       .finally(() => setLoading(false));
   }, []);
 
@@ -56,8 +58,10 @@ const ManageEmployersPage = () => {
       );
 
       showToast("success", "Employer approved successfully!");
-    } catch {
-      showToast("error", "Failed to approve employer.");
+    } catch (error) {
+      const message = error.message || handleApiError(error);
+      setError(message);
+      showToast("error", message);
     }
   };
 
@@ -71,8 +75,10 @@ const ManageEmployersPage = () => {
       );
 
       showToast("success", "Employer removed successfully!");
-    } catch {
-      showToast("error", "Failed to remove employer.");
+    } catch (error) {
+      const message = error.message || handleApiError(error);
+      setError(message);
+      showToast("error", message);
     }
   };
 
@@ -92,6 +98,12 @@ const ManageEmployersPage = () => {
           Approve or remove registered companies.
         </p>
       </div>
+
+      {error ? (
+        <div className="mb-4 rounded-lg px-4 py-3 text-sm" style={{ background: "#fef2f2", color: "#991b1b" }}>
+          {error}
+        </div>
+      ) : null}
 
       {/* Card */}
       <div

@@ -8,17 +8,15 @@ import com.pat.backend_pat.entity.Employer;
 import com.pat.backend_pat.entity.Job;
 import com.pat.backend_pat.entity.RoundResult;
 import com.pat.backend_pat.entity.User;
+import com.pat.backend_pat.exception.AccessDeniedException;
+import com.pat.backend_pat.exception.ResourceNotFoundException;
 import com.pat.backend_pat.repository.ApplicationRepository;
 import com.pat.backend_pat.repository.EmployerRepository;
 import com.pat.backend_pat.repository.JobRepository;
 import com.pat.backend_pat.repository.RoundResultRepository;
 import com.pat.backend_pat.repository.UserRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,23 +41,21 @@ public class JobService {
 
     private void validateEmployerJobAccess(String email, Job job) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (user.getRole() != User.Role.employer) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only employers can view applicants");
+            throw new AccessDeniedException("Only employers can view applicants");
         }
 
         Employer employer = employerRepository.findByUserUserId(user.getUserId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Employer profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Employer profile not found"));
 
-        if (!employer.getEmployerId().equals(job.getEmployer().getEmployerId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "You are not authorized to access applicants for this job");
+        if (job.getEmployer() == null || !employer.getEmployerId().equals(job.getEmployer().getEmployerId())) {
+            throw new AccessDeniedException("You are not authorized to access applicants for this job");
         }
     }
 
     public List<Job> getAllJobs(String branch, BigDecimal minCgpa) {
-
         if (branch == null && minCgpa == null) {
             return jobRepository.findAll()
                     .stream()
@@ -74,12 +70,11 @@ public class JobService {
     }
 
     public Job getJobById(Integer jobId) {
-
         Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
 
         if (job.getStatus() == Job.JobStatus.DELETED) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found");
+            throw new ResourceNotFoundException("Job not found");
         }
 
         return job;
@@ -87,21 +82,21 @@ public class JobService {
 
     public Job patchJobById(Integer jobId, String email, JobUpdateDTO dto) {
         Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (user.getRole() != User.Role.employer) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only employers can update jobs");
+            throw new AccessDeniedException("Only employers can update jobs");
         }
 
         Employer employer = employerRepository.findByUserUserId(user.getUserId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Employer profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Employer profile not found"));
 
         if (job.getEmployer() == null || job.getEmployer().getEmployerId() == null
                 || !job.getEmployer().getEmployerId().equals(employer.getEmployerId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this job");
+            throw new AccessDeniedException("You are not authorized to update this job");
         }
 
         if (dto.getJobTitle() != null) {
@@ -133,18 +128,13 @@ public class JobService {
     }
 
     public List<Application> getJobApplicants(Integer jobId, String email) {
-
-        // Reuse method
         Job job = getJobById(jobId);
-
         validateEmployerJobAccess(email, job);
-
         return applicationRepository.findByJob(job);
     }
 
     public List<RoundsManagerApplicantDTO> getRoundsManagerApplicants(Integer jobId, String email) {
         Job job = getJobById(jobId);
-
         validateEmployerJobAccess(email, job);
 
         List<Application> applications = applicationRepository.findByJob(job);
@@ -154,7 +144,7 @@ public class JobService {
                     List<RoundResultViewDTO> results = roundResultRepository
                             .findByApplicationOrderByRoundRoundOrderAsc(application)
                             .stream()
-                            .map(result -> toRoundResultView(result))
+                            .map(this::toRoundResultView)
                             .collect(Collectors.toList());
 
                     return new RoundsManagerApplicantDTO(

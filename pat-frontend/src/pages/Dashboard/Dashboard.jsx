@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { getDashboardStats } from "../../services/api";
+import { handleApiError } from "../../utils/handleApiError";
 
 const quickLinks = [
   { label: "Browse Placement Drives", path: "/jobs",         icon: "🏢", desc: "View and apply to open drives",     bg: "#eef2fe" },
@@ -14,11 +15,12 @@ const quickLinks = [
 const Dashboard = () => {
   const userName = localStorage.getItem("userName") ?? "Student";
   const [stats, setStats] = useState({ availableDrives: 0, myApplications: 0, upcomingInterviews: 0 });
+  const [error, setError] = useState("");
 
   useEffect(() => {
     getDashboardStats()
       .then((res) => setStats(res.data))
-      .catch(() => {}); // silently fall back to 0s
+      .catch((error) => setError(handleApiError(error)));
   }, []);
 
   const statCards = [
@@ -39,6 +41,12 @@ const Dashboard = () => {
           Here's a summary of your placement activity.
         </p>
       </div>
+
+      {error ? (
+        <div className="mb-4 rounded-lg px-4 py-3 text-sm" style={{ background: "#fef2f2", color: "#991b1b" }}>
+          {error}
+        </div>
+      ) : null}
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">

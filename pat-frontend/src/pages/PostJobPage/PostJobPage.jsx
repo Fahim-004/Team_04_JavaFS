@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { getJobById, getEmployerProfile, postJob, updateJob } from "../../services/api";
 import { isEmployerProfileComplete } from "../../utils/ProfileUtils";
+import { handleApiError } from "../../utils/handleApiError";
 
 const PostJobPage = () => {
   const navigate = useNavigate();
@@ -19,14 +20,13 @@ const PostJobPage = () => {
       const isComplete = isEmployerProfileComplete(profile);
 
       if (!isComplete) {
-      alert("Please complete your profile before posting a job.");
-      navigate("/employer/profile");
-      return;
+        alert("Please complete your profile before posting a job.");
+        navigate("/employer/profile");
+        return;
       }
-setIsApproved(profile.approvedStatus);
-
-    } catch (err) {
-      // API failure = treat as incomplete
+      setIsApproved(profile.approvedStatus);
+    } catch (error) {
+      setBannerError(error.message || handleApiError(error));
       alert("Please complete your profile before posting a job.");
       navigate("/employer/profile");
     }
@@ -55,8 +55,8 @@ setIsApproved(profile.approvedStatus);
           maxBacklogs: job.maxBacklogs ?? "",
           passingYear: job.passingYear ?? "",
         });
-      } catch (err) {
-        setBannerError(err.response?.data?.error || "Failed to load job for editing");
+      } catch (error) {
+        setBannerError(error.message || handleApiError(error));
       }
     };
 
@@ -102,21 +102,18 @@ setIsApproved(profile.approvedStatus);
       }
 
       alert(isEditMode ? "Job updated successfully!" : "Job posted successfully!");
-
       navigate("/employer/dashboard");
+    } catch (error) {
+      const details = Array.isArray(error?.details) ? error.details : [];
+      const mappedErrors = details.reduce((accumulator, detail) => {
+        if (detail?.field) {
+          accumulator[detail.field] = detail.message || "Invalid value";
+        }
+        return accumulator;
+      }, {});
 
-    } catch (err) {
-
-      const data = err.response?.data;
-
-      if (data?.error) {
-        setBannerError(data.error);
-      }
-
-      if (typeof data === "object") {
-        setErrors(data);
-      }
-
+      setErrors(mappedErrors);
+      setBannerError(error.message || handleApiError(error));
     } finally {
       setLoading(false);
     }

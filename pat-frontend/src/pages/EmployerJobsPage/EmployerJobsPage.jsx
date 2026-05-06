@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { deleteJob, getEmployerJobs, stopJobIntake } from "../../services/api";
+import { handleApiError } from "../../utils/handleApiError";
 
 const EmployerJobsPage = () => {
   const [jobs, setJobs] = useState([]);
@@ -9,18 +10,14 @@ const EmployerJobsPage = () => {
   const [busyJobId, setBusyJobId] = useState(null);
   const navigate = useNavigate();
 
-  const getErrorMessage = (err, fallback) => {
-    if (!err?.response?.data) return fallback;
-    if (typeof err.response.data === "string") return err.response.data;
-    return err.response.data.error || err.response.data.message || fallback;
-  };
+  const getErrorMessage = (error, fallback) => error?.message || handleApiError(error) || fallback;
 
   const statusLabel = (status) => status || "OPEN";
 
   useEffect(() => {
     getEmployerJobs()
       .then((res) => setJobs(res.data))
-      .catch((err) => setError(getErrorMessage(err, "Failed to load jobs")));
+      .catch((error) => setError(getErrorMessage(error, "Failed to load jobs")));
   }, []);
 
   const refreshJobs = async () => {
@@ -37,8 +34,8 @@ const EmployerJobsPage = () => {
       setBusyJobId(jobId);
       await stopJobIntake(jobId);
       await refreshJobs();
-    } catch (err) {
-      setError(getErrorMessage(err, "Failed to stop intake"));
+    } catch (error) {
+      setError(getErrorMessage(error, "Failed to stop intake"));
     } finally {
       setBusyJobId(null);
     }
@@ -51,8 +48,8 @@ const EmployerJobsPage = () => {
       setBusyJobId(jobId);
       await deleteJob(jobId);
       await refreshJobs();
-    } catch (err) {
-      setError(getErrorMessage(err, "Failed to delete job"));
+    } catch (error) {
+      setError(getErrorMessage(error, "Failed to delete job"));
     } finally {
       setBusyJobId(null);
     }

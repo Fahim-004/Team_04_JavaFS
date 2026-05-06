@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { getNotifications, markNotificationRead } from "../../services/api";
+import { handleApiError } from "../../utils/handleApiError";
 
 const normalizeNotification = (notification) => ({
   ...notification,
@@ -9,16 +10,21 @@ const normalizeNotification = (notification) => ({
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState("");
   const dropdownRef = useRef(null);
 
   // Fetch on mount
   useEffect(() => {
     getNotifications()
-      .then(res => {
+      .then((res) => {
         const list = Array.isArray(res.data) ? res.data : [];
         setNotifications(list.map(normalizeNotification));
+        setError("");
       })
-      .catch(() => setNotifications([]));
+      .catch((error) => {
+        setNotifications([]);
+        setError(error.message || handleApiError(error));
+      });
   }, []);
 
   // Close dropdown on outside click (production UX)
@@ -40,13 +46,14 @@ const NotificationBell = () => {
       await markNotificationRead(id);
 
       // ✅ NO refetch — local update
-      setNotifications(prev =>
-        prev.map(n =>
+      setNotifications((prev) =>
+        prev.map((n) =>
           n.notificationId === id ? { ...n, isRead: true, read: true } : n
         )
       );
-    } catch (err) {
-      console.error(err);
+      setError("");
+    } catch (error) {
+      setError(error.message || handleApiError(error));
     }
   };
 
@@ -113,6 +120,12 @@ const NotificationBell = () => {
           >
             Notifications
           </div>
+
+          {error ? (
+            <div style={{ padding: "12px 16px", color: "#991b1b", background: "#fef2f2", fontSize: "12px" }}>
+              {error}
+            </div>
+          ) : null}
 
           {/* List */}
           {notifications.length === 0 ? (

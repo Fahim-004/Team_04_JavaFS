@@ -2,15 +2,17 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { getEmployerJobs } from "../../services/api";
+import { handleApiError } from "../../utils/handleApiError";
 
 const EmployerDashboard = () => {
   const [jobs, setJobs] = useState([]);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     getEmployerJobs()
       .then((res) => setJobs(res.data))
-      .catch(() => {});
+      .catch((error) => setError(handleApiError(error)));
   }, []);
 
   const stats = [
@@ -36,6 +38,12 @@ const EmployerDashboard = () => {
 
   return (
     <DashboardLayout title="Employer Dashboard">
+
+      {error ? (
+        <div className="mb-4 rounded-lg px-4 py-3 text-sm" style={{ background: "#fef2f2", color: "#991b1b" }}>
+          {error}
+        </div>
+      ) : null}
 
       {/* Stats cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">

@@ -4,6 +4,7 @@ import {
   getEmployerProfile,
   saveEmployerProfile,
 } from "../../services/api";
+import { handleApiError } from "../../utils/handleApiError";
 
 const EmployerProfilePage = () => {
   const [form, setForm] = useState({
@@ -26,14 +27,8 @@ const EmployerProfilePage = () => {
           companyName: data.companyName || "",
           companyDescription: data.companyDescription || "",
         });
-      } catch (err) {
-        console.warn("Using mock profile data");
-
-        // fallback (no backend yet)
-        setForm({
-          companyName: "",
-          companyDescription: "",
-        });
+      } catch (error) {
+        setError(error.message || handleApiError(error));
       } finally {
         setInitialLoading(false);
       }
@@ -65,14 +60,10 @@ const EmployerProfilePage = () => {
         companyDescription: form.companyDescription.trim(),
       });
 
+      setError("");
       alert("Profile saved successfully");
-    } catch (err) {
-      console.warn("Save failed", err);
-
-      setError("Unable to save profile. Please try again.");
-
-      // fallback UX
-      alert("Saved locally (backend not connected yet)");
+    } catch (error) {
+      setError(error.message || handleApiError(error));
     } finally {
       setLoading(false);
     }

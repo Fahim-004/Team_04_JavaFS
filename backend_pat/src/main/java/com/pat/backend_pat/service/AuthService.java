@@ -6,6 +6,7 @@ import com.pat.backend_pat.dto.RegisterRequest;
 import com.pat.backend_pat.entity.Employer;
 import com.pat.backend_pat.entity.Student;
 import com.pat.backend_pat.entity.User;
+import com.pat.backend_pat.exception.ResourceNotFoundException;
 import com.pat.backend_pat.repository.EmployerRepository;
 import com.pat.backend_pat.repository.StudentRepository;
 import com.pat.backend_pat.repository.UserRepository;
@@ -33,7 +34,7 @@ public class AuthService {
     public AuthResponse register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already registered");
+            throw new IllegalArgumentException("Email already registered");
         }
 
         User user = new User();
@@ -65,11 +66,11 @@ public class AuthService {
     public AuthResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(
                 request.getPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new IllegalArgumentException("Invalid credentials");
         }
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
@@ -109,7 +110,7 @@ public class AuthService {
     @Transactional
     public void forgotPassword(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String token = UUID.randomUUID().toString();
         user.setResetToken(token);
@@ -122,11 +123,11 @@ public class AuthService {
     @Transactional
     public void resetPassword(String token, String newPassword) {
         User user = userRepository.findByResetToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid token"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid token"));
 
         LocalDateTime expiry = user.getResetTokenExpiry();
         if (expiry == null || expiry.isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Token expired");
+            throw new IllegalArgumentException("Token expired");
         }
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));

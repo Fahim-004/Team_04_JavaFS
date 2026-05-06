@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { getAdminStatistics } from "../../services/api";
 import StatCard from "../../components/StatCard/StatCard";
+import { handleApiError } from "../../utils/handleApiError";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
@@ -15,7 +17,7 @@ const AdminDashboard = () => {
       .then((res) => {
         setStats(res.data);
       })
-      .catch(() => {})
+      .catch((error) => setError(handleApiError(error)))
       .finally(() => setLoading(false));
   }, []);
 
@@ -33,6 +35,12 @@ const AdminDashboard = () => {
           Monitor platform activity and manage users.
         </p>
       </div>
+
+      {error ? (
+        <div className="mb-4 rounded-lg px-4 py-3 text-sm" style={{ background: "#fef2f2", color: "#991b1b" }}>
+          {error}
+        </div>
+      ) : null}
 
       {/* Content Card */}
       <div

@@ -2,6 +2,7 @@ package com.pat.backend_pat.service;
 
 import com.pat.backend_pat.entity.*;
 import com.pat.backend_pat.entity.Application.ApplicationStatus;
+import com.pat.backend_pat.exception.ResourceNotFoundException;
 import com.pat.backend_pat.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class RecruitmentRoundService {
 
     public RecruitmentRound createRound(Integer jobId, String roundName, Integer roundOrder) {
         Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
 
         RecruitmentRound round = new RecruitmentRound();
         round.setJob(job);
@@ -38,7 +39,7 @@ public class RecruitmentRoundService {
 
     public List<RecruitmentRound> getRoundsForJob(Integer jobId) {
         Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
         return roundRepository.findByJobOrderByRoundOrderAsc(job);
     }
 
@@ -53,7 +54,7 @@ public class RecruitmentRoundService {
             RecruitmentRound currentRound) {
 
         if (!application.getJob().getJobId().equals(currentRound.getJob().getJobId())) {
-            throw new RuntimeException("Round does not belong to this application's job");
+            throw new IllegalArgumentException("Round does not belong to this application's job");
         }
 
         List<RecruitmentRound> rounds = roundRepository.findByJobOrderByRoundOrderAsc(currentRound.getJob());
@@ -67,13 +68,13 @@ public class RecruitmentRoundService {
                     .findByApplicationAndRound(application, round);
 
             if (priorResult.isEmpty()) {
-                throw new RuntimeException(
+                throw new IllegalArgumentException(
                         "Blocked at Round " + round.getRoundOrder() + " ("
                                 + round.getRoundName() + "): result not updated yet");
             }
 
             if (priorResult.get().getStatus() != RoundStatus.PASSED) {
-                throw new RuntimeException(
+                throw new IllegalArgumentException(
                         "Blocked at Round " + round.getRoundOrder() + " ("
                                 + round.getRoundName() + "): status is "
                                 + priorResult.get().getStatus() + ", expected PASSED");
@@ -89,10 +90,10 @@ public class RecruitmentRoundService {
         RoundStatus roundStatus = RoundStatus.valueOf(status.toUpperCase());
 
         Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
 
         RecruitmentRound round = roundRepository.findById(roundId)
-                .orElseThrow(() -> new RuntimeException("Round not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Round not found"));
 
         validateRoundUpdateOrder(application, round);
 
@@ -117,7 +118,6 @@ public class RecruitmentRoundService {
 
         RoundResult saved = roundResultRepository.save(result);
 
-        // Use parsed enum to avoid case-mismatch bugs from request input.
         switch (roundStatus) {
             case FAILED:
                 System.out.println("SETTING REJECTED");

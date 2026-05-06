@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { getStudentProfile, savePersonalDetails, uploadResume } from "../../services/api";
+import { handleApiError } from "../../utils/handleApiError";
 
 const EMPTY = {
   fullName: "",
@@ -69,6 +70,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving]   = useState(false);
   const [toast, setToast]     = useState(null);
+  const [error, setError]     = useState("");
   const [resumeFile, setResumeFile] = useState(null);
 
   useEffect(() => {
@@ -95,7 +97,9 @@ const ProfilePage = () => {
       });
     }
   })
-      .catch(() => {})
+      .catch((error) => {
+        setError(error.message || handleApiError(error));
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -108,8 +112,9 @@ const ProfilePage = () => {
       await savePersonalDetails(form);
       localStorage.setItem("userName", form.fullName);
       showToast("success", "Profile updated successfully!");
-    } catch {
-      showToast("error", "Failed to save. Please try again.");
+    } catch (error) {
+      setError(error.message || handleApiError(error));
+      showToast("error", error.message || handleApiError(error));
     } finally {
       setSaving(false);
     }
@@ -126,11 +131,9 @@ const handleResumeUpload = async () => {
     await uploadResume(filePath);
     showToast("success", "Resume uploaded successfully!");
     setResumeFile(null);
-
-    // Optional: refresh the profile or show uploaded resumes list later
-  } catch (err) {
-    console.error(err);
-    showToast("error", "Resume upload failed. Please try again.");
+  } catch (error) {
+    setError(error.message || handleApiError(error));
+    showToast("error", error.message || handleApiError(error));
   }
 };
 
@@ -155,6 +158,12 @@ const handleResumeUpload = async () => {
           Keep your profile up to date for placement opportunities.
         </p>
       </div>
+
+      {error ? (
+        <div className="mb-4 rounded-lg px-4 py-3 text-sm" style={{ background: "#fef2f2", color: "#991b1b" }}>
+          {error}
+        </div>
+      ) : null}
 
       {/* Card */}
       <div className="rounded-2xl overflow-hidden"

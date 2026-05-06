@@ -1,21 +1,20 @@
 package com.pat.backend_pat.controller;
 
+import com.pat.backend_pat.dto.StudentAcademicDTO;
+import com.pat.backend_pat.dto.StudentDashboardStatsDTO;
 import com.pat.backend_pat.dto.StudentProfileDTO;
-import com.pat.backend_pat.entity.StudentAcademic;
 import com.pat.backend_pat.entity.Resume;
 import com.pat.backend_pat.entity.Student;
+import com.pat.backend_pat.entity.StudentAcademic;
 import com.pat.backend_pat.entity.User;
+import com.pat.backend_pat.exception.ResourceNotFoundException;
 import com.pat.backend_pat.repository.UserRepository;
 import com.pat.backend_pat.service.StudentService;
-import com.pat.backend_pat.dto.StudentAcademicDTO;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,7 +27,6 @@ public class StudentController {
     private final UserRepository userRepository;
 
     private Integer getCurrentUserId() {
-
         String email = SecurityContextHolder
                 .getContext()
                 .getAuthentication()
@@ -36,134 +34,60 @@ public class StudentController {
 
         User user = userRepository
                 .findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         return user.getUserId();
     }
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile() {
-
-        try {
-
-            Integer userId = getCurrentUserId();
-
-            Student student =
-                    studentService.getProfile(userId);
-
-            return ResponseEntity.ok(student);
-
-        } catch (RuntimeException ex) {
-
-            return ResponseEntity
-                    .status(404)
-                    .body(ex.getMessage());
-        }
+        Integer userId = getCurrentUserId();
+        Student student = studentService.getProfile(userId);
+        return ResponseEntity.ok(student);
     }
 
-    
-    
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(
             @Valid @RequestBody StudentProfileDTO dto) {
-
-        try {
-
-            Integer userId = getCurrentUserId();
-
-            Student updatedStudent =
-                    studentService.updateProfile(userId, dto);
-
-            return ResponseEntity.ok(updatedStudent);
-
-        } catch (RuntimeException ex) {
-
-            return ResponseEntity
-                    .badRequest()
-                    .body(ex.getMessage());
-        }
-        
+        Integer userId = getCurrentUserId();
+        Student updatedStudent = studentService.updateProfile(userId, dto);
+        return ResponseEntity.ok(updatedStudent);
     }
+
     @PutMapping("/academic")
     public ResponseEntity<?> updateAcademic(
             @Valid @RequestBody StudentAcademicDTO dto) {
-
-        try {
-
-            Integer userId = getCurrentUserId();
-
-            StudentAcademic updatedAcademic =
-                    studentService.updateAcademic(userId, dto);
-
-            return ResponseEntity.ok(updatedAcademic);
-
-        } catch (RuntimeException ex) {
-
-            return ResponseEntity
-                    .badRequest()
-                    .body(ex.getMessage());
-        }
+        Integer userId = getCurrentUserId();
+        StudentAcademic updatedAcademic = studentService.updateAcademic(userId, dto);
+        return ResponseEntity.ok(updatedAcademic);
     }
+
     @GetMapping("/academic")
     public ResponseEntity<?> getAcademic() {
-
-        try {
-
-            Integer userId = getCurrentUserId();
-
-            StudentAcademic academic =
-                    studentService.getAcademic(userId);
-
-            return ResponseEntity.ok(academic);
-
-        } catch (RuntimeException ex) {
-
-            return ResponseEntity
-                    .badRequest()
-                    .body(ex.getMessage());
-        }
+        Integer userId = getCurrentUserId();
+        StudentAcademic academic = studentService.getAcademic(userId);
+        return ResponseEntity.ok(academic);
     }
+
     @PostMapping("/resume")
     public ResponseEntity<?> uploadResume(
             @RequestParam String filePath) {
-
-        try {
-
-            Integer userId = getCurrentUserId();
-
-            Resume resume =
-                    studentService.uploadResume(userId, filePath);
-
-            return ResponseEntity
-                    .status(201)
-                    .body(resume);
-
-        } catch (RuntimeException ex) {
-
-            return ResponseEntity
-                    .badRequest()
-                    .body(ex.getMessage());
-        }
+        Integer userId = getCurrentUserId();
+        Resume resume = studentService.uploadResume(userId, filePath);
+        return ResponseEntity.status(201).body(resume);
     }
-    
+
     @GetMapping("/resumes")
     public ResponseEntity<?> getResumes() {
+        Integer userId = getCurrentUserId();
+        List<Resume> resumes = studentService.getResumes(userId);
+        return ResponseEntity.ok(resumes);
+    }
 
-        try {
-
-            Integer userId = getCurrentUserId();
-
-            List<Resume> resumes =
-                    studentService.getResumes(userId);
-
-            return ResponseEntity.ok(resumes);
-
-        } catch (RuntimeException ex) {
-
-            return ResponseEntity
-                    .badRequest()
-                    .body(ex.getMessage());
-        }
+    @GetMapping("/dashboard/stats")
+    public ResponseEntity<?> getDashboardStats() {
+        Integer userId = getCurrentUserId();
+        StudentDashboardStatsDTO stats = studentService.getDashboardStats(userId);
+        return ResponseEntity.ok(stats);
     }
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { getStudentProfile, saveAcademicDetails } from "../../services/api";
+import { handleApiError } from "../../utils/handleApiError";
 
 const EMPTY = {
   degree: "", branch: "", usn: "", semester: "",
@@ -37,7 +38,7 @@ const withFocus = (accentColor) => ({
 const baseStyle = { border: "1px solid #d1d5db", background: "#fafafa", color: "#111827" };
 
 // ── Sub-components ────────────────────────────────────────────
-const Field = ({ label, name, value, onChange, placeholder, type = "text" }) => (
+const Field = ({ label, name, value, onChange, placeholder, type = "text", error }) => (
   <div>
     <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: "#6b7280" }}>
       {label}
@@ -49,13 +50,14 @@ const Field = ({ label, name, value, onChange, placeholder, type = "text" }) => 
       onChange={onChange}
       placeholder={placeholder}
       className="w-full h-10 px-3 text-sm rounded-lg outline-none transition-all"
-      style={baseStyle}
+      style={{ ...baseStyle, borderColor: error ? "#ef4444" : baseStyle.borderColor }}
       {...withFocus("#f59e0b")}
     />
+    {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
   </div>
 );
 
-const Select = ({ label, name, value, onChange, options, placeholder }) => (
+const Select = ({ label, name, value, onChange, options, placeholder, error }) => (
   <div>
     <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: "#6b7280" }}>
       {label}
@@ -65,16 +67,17 @@ const Select = ({ label, name, value, onChange, options, placeholder }) => (
       value={value || ""}
       onChange={onChange}
       className="w-full h-10 px-3 text-sm rounded-lg outline-none transition-all appearance-none"
-      style={baseStyle}
+      style={{ ...baseStyle, borderColor: error ? "#ef4444" : baseStyle.borderColor }}
       {...withFocus("#f59e0b")}
     >
       <option value="">{placeholder || `Select ${label}`}</option>
       {options.map((o) => <option key={o} value={o}>{o}</option>)}
     </select>
+    {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
   </div>
 );
 
-const TextArea = ({ label, name, value, onChange, placeholder, hint }) => (
+const TextArea = ({ label, name, value, onChange, placeholder, hint, error }) => (
   <div>
     <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: "#6b7280" }}>
       {label}
@@ -86,10 +89,11 @@ const TextArea = ({ label, name, value, onChange, placeholder, hint }) => (
       placeholder={placeholder}
       rows={3}
       className="w-full px-3 py-2.5 text-sm rounded-lg outline-none transition-all resize-none"
-      style={baseStyle}
+      style={{ ...baseStyle, borderColor: error ? "#ef4444" : baseStyle.borderColor }}
       {...withFocus("#f59e0b")}
     />
     {hint && <p className="text-xs mt-1" style={{ color: "#9ca3af" }}>{hint}</p>}
+    {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
   </div>
 );
 
@@ -125,6 +129,8 @@ const AcademicPage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving]   = useState(false);
   const [toast, setToast]     = useState(null);
+  const [error, setError]     = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     getStudentProfile()
@@ -147,7 +153,7 @@ const AcademicPage = () => {
           });
         }
       })
-      .catch(() => {})
+      .catch((error) => setError(error.message || handleApiError(error)))
       .finally(() => setLoading(false));
   }, []);
 
@@ -156,6 +162,8 @@ const AcademicPage = () => {
 
   const handleSave = async () => {
     setSaving(true);
+    setError("");
+    setFieldErrors({});
     try {
       await saveAcademicDetails({
         ...form,
@@ -167,8 +175,18 @@ const AcademicPage = () => {
         twelfth:      form.twelfth      ? parseFloat(form.twelfth)    : null,
       });
       showToast("success", "Academic details saved successfully!");
-    } catch {
-      showToast("error", "Failed to save. Please try again.");
+    } catch (error) {
+      const details = Array.isArray(error?.details) ? error.details : [];
+      const mappedErrors = details.reduce((accumulator, detail) => {
+        if (detail?.field) {
+          accumulator[detail.field] = detail.message || "Invalid value";
+        }
+        return accumulator;
+      }, {});
+
+      setFieldErrors(mappedErrors);
+      setError(error.message || handleApiError(error));
+      showToast("error", error.message || handleApiError(error));
     } finally {
       setSaving(false);
     }
@@ -191,6 +209,12 @@ const AcademicPage = () => {
           Keep your academic information accurate for placement eligibility.
         </p>
       </div>
+
+      {error ? (
+        <div className="mb-4 rounded-lg px-4 py-3 text-sm" style={{ background: "#fef2f2", color: "#991b1b" }}>
+          {error}
+        </div>
+      ) : null}
 
       {/* Card */}
       <div
@@ -229,12 +253,14 @@ const AcademicPage = () => {
                 <Select
                   label="Degree" name="degree" value={form.degree} onChange={handleChange}
                   options={["B.E / B.Tech", "M.E / M.Tech"]}
+                  error={fieldErrors.degree}
                 />
                 <Select
                   label="Branch" name="branch" value={form.branch} onChange={handleChange}
                   options={BRANCHES}
+                  error={fieldErrors.branch}
                 />
-                <Field label="USN"          name="usn"         value={form.usn}         onChange={handleChange} placeholder="e.g. 1XX21CS001" />
+                <Field label="USN"          name="usn"         value={form.usn}         onChange={handleChange} placeholder="e.g. 1XX21CS001" error={fieldErrors.usn} />
                 <Select
                   label="Semester" name="semester" value={form.semester} onChange={handleChange}
                   options={["1","2","3","4","5","6","7","8"]}

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { getJobById, getStudentResumes, applyForJob } from "../../services/api";
+import { handleApiError } from "../../utils/handleApiError";
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "—";
@@ -46,6 +47,7 @@ const JobDetailPage = () => {
   const [selectedResume, setSelectedResume] = useState("");
   const [applying, setApplying]         = useState(false);
   const [toast, setToast]               = useState(null);
+  const [error, setError]               = useState("");
 
   const showToast = (type, msg) => {
     setToast({ type, msg });
@@ -58,7 +60,7 @@ const JobDetailPage = () => {
         setJob(jobRes.data);
         setResumes(resumeRes.data || []);
       })
-      .catch(() => {})
+      .catch((error) => setError(error.message || handleApiError(error)))
       .finally(() => setLoading(false));
   }, [jobId]);
 
@@ -73,12 +75,8 @@ const JobDetailPage = () => {
       showToast("success", "Application submitted successfully!");
       setShowApply(false);
       setSelectedResume("");
-    } catch (err) {
-      const msg =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Failed to apply. Please try again.";
-      showToast("error", msg);
+    } catch (error) {
+      showToast("error", error.message || handleApiError(error));
     } finally {
       setApplying(false);
     }
@@ -105,6 +103,12 @@ const JobDetailPage = () => {
           Review the job details and apply if you are eligible.
         </p>
       </div>
+
+      {error ? (
+        <div className="mb-4 rounded-lg px-4 py-3 text-sm" style={{ background: "#fef2f2", color: "#991b1b" }}>
+          {error}
+        </div>
+      ) : null}
 
       {loading ? (
         <p className="text-center py-12 text-sm" style={{ color: "#9ca3af" }}>

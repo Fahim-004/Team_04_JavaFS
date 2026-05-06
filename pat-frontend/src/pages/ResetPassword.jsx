@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { resetPassword } from "../services/api";
+import { handleApiError } from "../utils/handleApiError";
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -32,8 +33,8 @@ const ResetPassword = () => {
       setTimeout(() => {
         window.location.href = "/login";
       }, 2000);
-    } catch (err) {
-      setError(err?.response?.data?.message || "Failed to reset password.");
+    } catch (error) {
+      setError(error.message || handleApiError(error));
     } finally {
       setLoading(false);
     }

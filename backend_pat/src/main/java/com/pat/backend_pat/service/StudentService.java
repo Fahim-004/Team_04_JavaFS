@@ -1,20 +1,24 @@
 package com.pat.backend_pat.service;
 
 import com.pat.backend_pat.dto.StudentAcademicDTO;
-import com.pat.backend_pat.entity.StudentAcademic;
-import com.pat.backend_pat.repository.StudentAcademicRepository;
+import com.pat.backend_pat.dto.StudentDashboardStatsDTO;
 import com.pat.backend_pat.dto.StudentProfileDTO;
+import com.pat.backend_pat.entity.Job;
 import com.pat.backend_pat.entity.Resume;
+import com.pat.backend_pat.entity.RoundStatus;
 import com.pat.backend_pat.entity.Student;
+import com.pat.backend_pat.entity.StudentAcademic;
+import com.pat.backend_pat.exception.ResourceNotFoundException;
+import com.pat.backend_pat.repository.ApplicationRepository;
+import com.pat.backend_pat.repository.JobRepository;
 import com.pat.backend_pat.repository.ResumeRepository;
+import com.pat.backend_pat.repository.RoundResultRepository;
+import com.pat.backend_pat.repository.StudentAcademicRepository;
 import com.pat.backend_pat.repository.StudentRepository;
-import com.pat.backend_pat.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,21 +29,22 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
     private final ResumeRepository resumeRepository;
-    private final UserRepository userRepository;
+    private final ApplicationRepository applicationRepository;
+    private final JobRepository jobRepository;
+    private final RoundResultRepository roundResultRepository;
 
     // ✅ 1. Get Profile
     @Transactional
     public Student getProfile(Integer userId) {
         return studentRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Student profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
     }
 
     // ✅ 2. Update Profile
     @Transactional
     public Student updateProfile(Integer userId, StudentProfileDTO dto) {
-
         Student student = studentRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Student profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
 
         student.setFullName(dto.getFullName());
         student.setPhoneNumber(dto.getPhoneNumber());
@@ -54,16 +59,14 @@ public class StudentService {
         student.setGithubUrl(dto.getGithubUrl());
 
         student.setProfileCompleted(true);
-
         return studentRepository.save(student);
     }
 
     // ✅ 3. Upload Resume
     @Transactional
     public Resume uploadResume(Integer userId, String filePath) {
-
         Student student = studentRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Student profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
 
         Resume resume = new Resume();
         resume.setStudent(student);
@@ -77,18 +80,18 @@ public class StudentService {
     // ✅ 4. Get All Resumes
     @Transactional
     public List<Resume> getResumes(Integer userId) {
-
         Student student = studentRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Student profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
 
         return resumeRepository.findByStudentStudentId(student.getStudentId());
     }
+
     @Autowired
     private StudentAcademicRepository studentAcademicRepository;
-    public StudentAcademic updateAcademic(Integer userId, StudentAcademicDTO dto) {
 
+    public StudentAcademic updateAcademic(Integer userId, StudentAcademicDTO dto) {
         Student student = studentRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
         StudentAcademic academic = studentAcademicRepository
                 .findByStudentStudentId(student.getStudentId())
@@ -103,13 +106,39 @@ public class StudentService {
 
         return studentAcademicRepository.save(academic);
     }
-    public StudentAcademic getAcademic(Integer userId) {
 
+    public StudentAcademic getAcademic(Integer userId) {
         Student student = studentRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
         return studentAcademicRepository
                 .findByStudentStudentId(student.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Academic details not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Academic details not found"));
+    }
+
+    @Transactional
+    public StudentDashboardStatsDTO getDashboardStats(Integer userId) {
+        // Get student; throw if not found (not silent null)
+        Student student = studentRepository.findByUserUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
+
+        // Available drives: count of open jobs (efficient count query)
+        long availableDrives = jobRepository.countByStatus(Job.JobStatus.OPEN);
+
+        // My applications: count of this student's applications (efficient count query)
+        long myApplications = applicationRepository.countByStudent(student);
+
+        // Upcoming interviews: count distinct applications where student passed a round
+        // (efficient database query, not stream-based)
+        long upcomingInterviews = roundResultRepository
+                .countDistinctByApplicationStudentAndStatus(
+                        student,
+                        RoundStatus.PASSED);
+
+        return new StudentDashboardStatsDTO(
+                (int) availableDrives,
+                (int) myApplications,
+                (int) upcomingInterviews
+        );
     }
 }
