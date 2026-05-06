@@ -141,6 +141,27 @@ const DashboardNavbar = ({ title }) => {
                 <span>View Profile</span>
               </button>
 
+              <button
+                onClick={() => {
+                  setDropdownOpen(false);
+                  navigate("/change-password");
+                }}
+                className="w-full flex items-center gap-3 text-sm"
+                style={{
+                  padding:    "10px 16px",
+                  background: "transparent",
+                  border:     "none",
+                  cursor:     "pointer",
+                  color:      "#374151",
+                  textAlign:  "left",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#f3f4f6"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+              >
+                <span style={{ fontSize: "14px" }}>🔑</span>
+                <span>Change Password</span>
+              </button>
+
               {/* Divider */}
               <div style={{ height: "1px", background: "#f3f4f6" }} />
 

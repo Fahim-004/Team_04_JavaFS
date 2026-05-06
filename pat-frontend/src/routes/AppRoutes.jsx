@@ -5,6 +5,7 @@ import LoginPage          from "../pages/LoginPage/LoginPage";
 import RegisterPage       from "../pages/RegisterPage/RegisterPage";
 import ForgotPassword     from "../pages/ForgotPassword";
 import ResetPassword      from "../pages/ResetPassword";
+import ChangePassword     from "../pages/ChangePassword";
 // Student Pages
 import Dashboard          from "../pages/Dashboard/Dashboard";
 import JobListPage        from "../pages/JobListPage/JobListPage";
@@ -27,6 +28,7 @@ import ManageEmployersPage from "../pages/ManageEmployersPage/ManageEmployersPag
 import ManageStudentsPage from "../pages/ManageStudentsPage/ManageStudentsPage";
 import RoundsManagerPage from "../pages/RoundsManagerPage/RoundsManagerPage";
 import AdminRoutes from "../routes/AdminRoutes";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 const AppRoutes = () => {
   return (
@@ -37,6 +39,11 @@ const AppRoutes = () => {
         <Route path="/register"       element={<RegisterPage />} /> {/*Register Page*/}
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/change-password" element={
+          <ProtectedRoute>
+            <ChangePassword />
+          </ProtectedRoute>
+        } />
         
         <Route path="/dashboard" element={
           <StudentRoutes>

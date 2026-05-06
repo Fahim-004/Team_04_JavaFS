@@ -37,6 +37,7 @@ api.interceptors.response.use(
 
 export const loginUser = (data) => api.post("/auth/login", data);
 export const registerUser = (data) => api.post("/auth/register", data);
+export const changePassword = (data) => api.post("/auth/change-password", data);
 
 // ── students Profile ───────────────────────────────────────────
 export const getStudentProfile = () => api.get("/students/profile");

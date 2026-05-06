@@ -3,6 +3,7 @@ package com.pat.backend_pat.controller;
 import com.pat.backend_pat.dto.AuthResponse;
 import com.pat.backend_pat.dto.LoginRequest;
 import com.pat.backend_pat.dto.RegisterRequest;
+import com.pat.backend_pat.dto.ChangePasswordRequest;
 import com.pat.backend_pat.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,5 +42,12 @@ public class AuthController {
     public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
         authService.resetPassword(token, newPassword);
         return ResponseEntity.ok("Password reset successful");
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request) {
+        authService.changePassword(request);
+        return ResponseEntity.ok("Password changed successfully");
     }
 }

@@ -1,17 +1,22 @@
 package com.pat.backend_pat.service;
 
 import com.pat.backend_pat.dto.AuthResponse;
+import com.pat.backend_pat.dto.ChangePasswordRequest;
 import com.pat.backend_pat.dto.LoginRequest;
 import com.pat.backend_pat.dto.RegisterRequest;
 import com.pat.backend_pat.entity.Employer;
 import com.pat.backend_pat.entity.Student;
 import com.pat.backend_pat.entity.User;
+import com.pat.backend_pat.exception.AccessDeniedException;
 import com.pat.backend_pat.exception.ResourceNotFoundException;
+import com.pat.backend_pat.exception.ValidationException;
 import com.pat.backend_pat.repository.EmployerRepository;
 import com.pat.backend_pat.repository.StudentRepository;
 import com.pat.backend_pat.repository.UserRepository;
 import com.pat.backend_pat.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,7 +71,7 @@ public class AuthService {
     public AuthResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(
                 request.getPassword(), user.getPasswordHash())) {
@@ -80,8 +85,8 @@ public class AuthService {
         // If user is student → get fullName
         if (user.getRole() == User.Role.student) {
             Student student = studentRepository
-                .findByUserUserId(user.getUserId())
-                .orElse(null);
+                    .findByUserUserId(user.getUserId())
+                    .orElse(null);
 
             if (student != null) {
                 name = student.getFullName();
@@ -91,8 +96,8 @@ public class AuthService {
         // If user is employer → get companyName
         if (user.getRole() == User.Role.employer) {
             Employer employer = employerRepository
-                .findByUserUserId(user.getUserId())
-                .orElse(null);
+                    .findByUserUserId(user.getUserId())
+                    .orElse(null);
 
             if (employer != null) {
                 name = employer.getCompanyName();
@@ -100,11 +105,10 @@ public class AuthService {
         }
 
         return new AuthResponse(
-            token,
-            user.getRole().name(),
-            user.getUserId(),
-            name
-        );
+                token,
+                user.getRole().name(),
+                user.getUserId(),
+                name);
     }
 
     @Transactional
@@ -133,6 +137,25 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         user.setResetToken(null);
         user.setResetTokenExpiry(null);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null
+                || "anonymousUser".equals(authentication.getName())) {
+            throw new AccessDeniedException("User is not authenticated");
+        }
+
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPasswordHash())) {
+            throw new ValidationException("Current password is incorrect");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
 }
