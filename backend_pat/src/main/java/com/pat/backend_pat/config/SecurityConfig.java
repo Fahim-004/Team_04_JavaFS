@@ -37,19 +37,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configure(http))
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/jobs").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/jobs/**").permitAll()
-                .requestMatchers("/api/v1/admin/**").hasAuthority("ROLE_admin")
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthFilter, 
-                UsernamePasswordAuthenticationFilter.class);
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configure(http))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/jobs").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/jobs/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+                        .requestMatchers("/api/v1/admin/**").hasAuthority("ROLE_admin")
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
