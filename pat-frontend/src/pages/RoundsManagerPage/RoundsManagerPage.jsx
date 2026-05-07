@@ -5,6 +5,7 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import {
   createRound,
   getJobRounds,
+  updateRound,
   updateRoundResult,
   getRoundsApplicants,
 } from "../../services/api";
@@ -44,6 +45,7 @@ const RoundsManagerPage = () => {
 
   const [roundName, setRoundName] = useState("");
   const [roundOrder, setRoundOrder] = useState("");
+  const [editingRoundId, setEditingRoundId] = useState(null);
 
   const [toast, setToast] = useState(null);
 
@@ -133,10 +135,59 @@ const RoundsManagerPage = () => {
 
       setRoundName("");
       setRoundOrder("");
+      setEditingRoundId(null);
 
       fetchData();
     } catch (error) {
       showToast("error", handleApiError(error) || "Failed to add round");
+    }
+  };
+
+  const handleEditClick = (round) => {
+    setEditingRoundId(round.roundId);
+    setRoundName(round.roundName || "");
+    setRoundOrder(round.roundOrder != null ? String(round.roundOrder) : "");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingRoundId(null);
+    setRoundName("");
+    setRoundOrder("");
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingRoundId) return;
+
+    const payload = {};
+
+    const name = typeof roundName === "string" ? roundName.trim() : "";
+    if (name) payload.roundName = name;
+
+    if (roundOrder !== "" && roundOrder != null) {
+      payload.roundOrder = Number(roundOrder);
+    }
+
+    if (Object.keys(payload).length === 0) {
+      showToast("error", "Provide at least one field to update");
+      return;
+    }
+
+    try {
+      await updateRound(editingRoundId, payload);
+      showToast("success", "Round updated");
+      handleCancelEdit();
+      fetchData();
+    } catch (error) {
+      const status = error?.status;
+      if (status === 409) {
+        showToast("error", "A round with this order already exists.");
+      } else if (status === 403) {
+        showToast("error", "You are not allowed to edit this round.");
+      } else if (status === 404) {
+        showToast("error", "This round no longer exists.");
+      } else {
+        showToast("error", "Unable to update round. Please try again.");
+      }
     }
   };
 
@@ -156,7 +207,7 @@ const RoundsManagerPage = () => {
     <DashboardLayout title="Rounds Manager">
       <Toast toast={toast} />
 
-      {/* ➕ Add Round */}
+      {/* ➕ Add / ✏️ Edit Round */}
       <div
         style={{
           background: "#fff",
@@ -166,7 +217,9 @@ const RoundsManagerPage = () => {
           marginBottom: "20px",
         }}
       >
-        <h3 style={{ marginBottom: "10px" }}>Add New Round</h3>
+        <h3 style={{ marginBottom: "10px" }}>
+          {editingRoundId ? "Edit Round" : "Add New Round"}
+        </h3>
 
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <input
@@ -195,7 +248,7 @@ const RoundsManagerPage = () => {
           />
 
           <button
-            onClick={handleAddRound}
+            onClick={editingRoundId ? handleSaveEdit : handleAddRound}
             style={{
               background: "#4c7ef0",
               color: "#fff",
@@ -205,8 +258,24 @@ const RoundsManagerPage = () => {
               cursor: "pointer",
             }}
           >
-            Add Round
+            {editingRoundId ? "Save" : "Add Round"}
           </button>
+
+          {editingRoundId ? (
+            <button
+              onClick={handleCancelEdit}
+              style={{
+                background: "#fff",
+                color: "#111827",
+                border: "1px solid #d1d5db",
+                padding: "8px 14px",
+                borderRadius: "6px",
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -228,6 +297,21 @@ const RoundsManagerPage = () => {
             <h3 style={{ marginBottom: "12px" }}>
               {round.roundName} (Order {round.roundOrder})
             </h3>
+
+            <div style={{ marginBottom: "12px" }}>
+              <button
+                onClick={() => handleEditClick(round)}
+                style={{
+                  padding: "6px 10px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                  background: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                Edit
+              </button>
+            </div>
 
             {(() => {
               const eligibleApplicants = applicants.filter((app) =>

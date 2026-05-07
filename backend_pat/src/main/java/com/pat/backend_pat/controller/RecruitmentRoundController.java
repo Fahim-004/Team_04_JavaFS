@@ -1,8 +1,10 @@
 package com.pat.backend_pat.controller;
 
+import com.pat.backend_pat.dto.RecruitmentRoundUpdateDTO;
 import com.pat.backend_pat.service.RecruitmentRoundService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
@@ -27,6 +29,15 @@ public class RecruitmentRoundController {
     @GetMapping("/jobs/{jobId}/rounds")
     public ResponseEntity<?> getRounds(@PathVariable Integer jobId) {
         return ResponseEntity.ok(roundService.getRoundsForJob(jobId));
+    }
+
+    @PutMapping("/rounds/{roundId}")
+    public ResponseEntity<?> updateRound(
+            @PathVariable Integer roundId,
+            @RequestBody RecruitmentRoundUpdateDTO dto,
+            Authentication auth) {
+        String email = auth.getName();
+        return ResponseEntity.ok(roundService.updateRoundById(roundId, email, dto));
     }
 
     @PutMapping("/rounds/update-result")

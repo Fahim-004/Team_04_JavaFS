@@ -10,4 +10,6 @@ public interface RecruitmentRoundRepository extends JpaRepository<RecruitmentRou
     List<RecruitmentRound> findByJobOrderByRoundOrderAsc(Job job);
 
     boolean existsByJobAndRoundOrder(Job job, Integer roundOrder);
+
+    boolean existsByJobAndRoundOrderAndRoundIdNot(Job job, Integer roundOrder, Integer roundId);
 }

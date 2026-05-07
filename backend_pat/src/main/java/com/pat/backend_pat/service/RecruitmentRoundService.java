@@ -1,8 +1,12 @@
 package com.pat.backend_pat.service;
 
+import com.pat.backend_pat.dto.RecruitmentRoundUpdateDTO;
 import com.pat.backend_pat.entity.*;
 import com.pat.backend_pat.entity.Application.ApplicationStatus;
+import com.pat.backend_pat.exception.AccessDeniedException;
+import com.pat.backend_pat.exception.ConflictException;
 import com.pat.backend_pat.exception.ResourceNotFoundException;
+import com.pat.backend_pat.exception.ValidationException;
 import com.pat.backend_pat.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,10 @@ public class RecruitmentRoundService {
     private JobRepository jobRepository;
     @Autowired
     private RecruitmentRoundRepository roundRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private EmployerRepository employerRepository;
     @Autowired
     private ApplicationRepository applicationRepository;
     @Autowired
@@ -45,6 +53,48 @@ public class RecruitmentRoundService {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
         return roundRepository.findByJobOrderByRoundOrderAsc(job);
+    }
+
+    public RecruitmentRound updateRoundById(Integer roundId, String email, RecruitmentRoundUpdateDTO dto) {
+        RecruitmentRound round = roundRepository.findById(roundId)
+                .orElseThrow(() -> new ResourceNotFoundException("Round not found"));
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (user.getRole() != User.Role.employer) {
+            throw new AccessDeniedException("You are not authorized to edit this round");
+        }
+
+        Employer employer = employerRepository.findByUserUserId(user.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employer profile not found"));
+
+        Job job = round.getJob();
+        if (job == null || job.getEmployer() == null
+                || job.getEmployer().getEmployerId() == null
+                || !job.getEmployer().getEmployerId().equals(employer.getEmployerId())) {
+            throw new AccessDeniedException("You are not authorized to edit this round");
+        }
+
+        Integer newRoundOrder = dto != null ? dto.getRoundOrder() : null;
+        String newRoundName = dto != null ? dto.getRoundName() : null;
+
+        if (newRoundOrder != null && !newRoundOrder.equals(round.getRoundOrder())) {
+            if (roundRepository.existsByJobAndRoundOrderAndRoundIdNot(round.getJob(), newRoundOrder, round.getRoundId())) {
+                throw new ConflictException("A round with this order already exists for this job");
+            }
+            round.setRoundOrder(newRoundOrder);
+        }
+
+        if (newRoundName != null) {
+            String trimmed = newRoundName.trim();
+            if (trimmed.isEmpty()) {
+                throw new ValidationException("roundName cannot be empty");
+            }
+            round.setRoundName(trimmed);
+        }
+
+        return roundRepository.save(round);
     }
 
     private boolean isFinalRound(RecruitmentRound currentRound) {

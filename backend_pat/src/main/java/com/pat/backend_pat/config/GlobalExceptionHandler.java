@@ -3,6 +3,7 @@ package com.pat.backend_pat.config;
 import com.pat.backend_pat.dto.ErrorResponse;
 import com.pat.backend_pat.dto.ValidationErrorDetail;
 import com.pat.backend_pat.exception.AccessDeniedException;
+import com.pat.backend_pat.exception.ConflictException;
 import com.pat.backend_pat.exception.ResourceNotFoundException;
 import com.pat.backend_pat.exception.ValidationException;
 import jakarta.persistence.EntityNotFoundException;
@@ -119,6 +120,21 @@ public class GlobalExceptionHandler {
                         ex.getMessage(),
                         "ACCESS_DENIED",
                         HttpStatus.FORBIDDEN,
+                        request.getRequestURI(),
+                        null));
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflictException(
+            ConflictException ex,
+            HttpServletRequest request) {
+        logError("GlobalExceptionHandler#handleConflictException", ex);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(buildResponse(
+                        ex.getMessage(),
+                        "CONFLICT",
+                        HttpStatus.CONFLICT,
                         request.getRequestURI(),
                         null));
     }
