@@ -24,6 +24,9 @@ public class Employer {
     @Column(nullable = false)
     private Boolean approvedStatus = false;
 
+    @Column(nullable = false)
+    private Boolean rejectedStatus = false;
+
     @Column(insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -33,13 +36,14 @@ public class Employer {
 
     // All-args constructor
     public Employer(Integer employerId, User user, String companyName,
-                    String companyDescription, Boolean approvedStatus,
+                    String companyDescription, Boolean approvedStatus, Boolean rejectedStatus,
                     LocalDateTime createdAt) {
         this.employerId = employerId;
         this.user = user;
         this.companyName = companyName;
         this.companyDescription = companyDescription;
         this.approvedStatus = approvedStatus;
+        this.rejectedStatus = rejectedStatus;
         this.createdAt = createdAt;
     }
 
@@ -83,6 +87,14 @@ public class Employer {
 
     public void setApprovedStatus(Boolean approvedStatus) {
         this.approvedStatus = approvedStatus;
+    }
+
+    public Boolean getRejectedStatus() {
+        return rejectedStatus;
+    }
+
+    public void setRejectedStatus(Boolean rejectedStatus) {
+        this.rejectedStatus = rejectedStatus;
     }
 
     public LocalDateTime getCreatedAt() {

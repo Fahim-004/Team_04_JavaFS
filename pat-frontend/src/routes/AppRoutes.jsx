@@ -21,6 +21,8 @@ import PostJobPage from "../pages/PostJobPage/PostJobPage";
 import ApplicantsPage from "../pages/ApplicantsPage/ApplicantsPage";
 import EmployerJobsPage from "../pages/EmployerJobsPage/EmployerJobsPage";
 import EmployerProfilePage from "../pages/EmployerProfilePage/EmployerProfilePage";
+import EmployerRejectedPage from "../pages/EmployerRejectedPage/EmployerRejectedPage";
+import EmployerPendingApprovalPage from "../pages/EmployerPendingApprovalPage/EmployerPendingApprovalPage";
 import EmployerRoutes from "../routes/EmployerRoutes";
 // Admin Pages
 import AdminDashboard from "../pages/AdminDashboard/AdminDashboard";
@@ -122,6 +124,9 @@ const AppRoutes = () => {
             <RoundsManagerPage />
           </EmployerRoutes>
         } />
+
+        <Route path="/employer/rejected" element={<EmployerRejectedPage />} />
+        <Route path="/employer/pending-approval" element={<EmployerPendingApprovalPage />} />
 
         <Route
           path="/admin/dashboard"

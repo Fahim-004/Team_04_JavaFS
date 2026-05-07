@@ -13,4 +13,6 @@ public class AuthResponse {
     private String role;
     private Integer userId;
     private String name;
+    private Boolean approvedStatus;
+    private Boolean rejectedStatus;
 }

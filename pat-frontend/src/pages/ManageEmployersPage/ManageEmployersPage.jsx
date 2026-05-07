@@ -69,12 +69,16 @@ const ManageEmployersPage = () => {
     try {
       await removeEmployer(id);
 
-      // remove from state
+      // keep row and mark as not approved after rejection
       setEmployers((prev) =>
-        prev.filter((emp) => emp.employerId !== id)
+        prev.map((emp) =>
+          emp.employerId === id
+            ? { ...emp, approvedStatus: false }
+            : emp
+        )
       );
 
-      showToast("success", "Employer removed successfully!");
+      showToast("success", "Employer rejected successfully!");
     } catch (error) {
       const message = error.message || handleApiError(error);
       setError(message);

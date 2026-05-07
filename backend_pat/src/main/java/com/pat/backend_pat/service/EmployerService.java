@@ -11,8 +11,10 @@ import com.pat.backend_pat.exception.ValidationException;
 import com.pat.backend_pat.repository.EmployerRepository;
 import com.pat.backend_pat.repository.JobRepository;
 import com.pat.backend_pat.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,6 +54,16 @@ public class EmployerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Employer profile not found"));
     }
 
+    private void ensureEmployerApproved(Integer userId) {
+        Employer employer = getEmployerOwnedBy(userId);
+        if (Boolean.TRUE.equals(employer.getRejectedStatus())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Employer account rejected");
+        }
+        if (Boolean.FALSE.equals(employer.getApprovedStatus())) {
+            throw new ValidationException("Your employer account is pending admin approval. You cannot access employer features until approved.");
+        }
+    }
+
     private Job getOwnedJob(Integer userId, Integer jobId) {
         Employer employer = getEmployerOwnedBy(userId);
 
@@ -68,12 +80,14 @@ public class EmployerService {
     @Transactional
     public Employer getProfile(Integer userId) {
         validateEmployerUser(userId);
+        ensureEmployerApproved(userId);
         return getEmployerOwnedBy(userId);
     }
 
     @Transactional
     public Employer updateProfile(Integer userId, EmployerProfileDTO dto) {
         User user = validateEmployerUser(userId);
+        ensureEmployerApproved(userId);
 
         Employer employer = employerRepository.findByUserUserId(userId)
                 .orElseGet(() -> {
@@ -91,12 +105,9 @@ public class EmployerService {
     @Transactional
     public Job postJob(Integer userId, CreateJobDTO dto) {
         validateEmployerUser(userId);
+        ensureEmployerApproved(userId);
 
         Employer employer = getEmployerOwnedBy(userId);
-
-        if (!employer.getApprovedStatus()) {
-            throw new ValidationException("Your employer account is pending admin approval. You cannot post jobs until approved.");
-        }
 
         jobValidationService.validateDates(dto.getApplicationDeadline(), dto.getPlacementDriveDate());
 
@@ -120,6 +131,7 @@ public class EmployerService {
     @Transactional
     public Job updateJob(Integer userId, Integer jobId, CreateJobDTO dto) {
         validateEmployerUser(userId);
+        ensureEmployerApproved(userId);
 
         Job job = getOwnedJob(userId, jobId);
 
@@ -146,6 +158,7 @@ public class EmployerService {
     @Transactional
     public Job stopJobIntake(Integer userId, Integer jobId) {
         validateEmployerUser(userId);
+        ensureEmployerApproved(userId);
 
         Job job = getOwnedJob(userId, jobId);
 
@@ -160,6 +173,7 @@ public class EmployerService {
     @Transactional
     public void deleteJob(Integer userId, Integer jobId) {
         validateEmployerUser(userId);
+        ensureEmployerApproved(userId);
 
         Job job = getOwnedJob(userId, jobId);
         job.setStatus(Job.JobStatus.DELETED);
@@ -168,6 +182,7 @@ public class EmployerService {
 
     public List<Job> getEmployerJobs(Integer userId) {
         validateEmployerUser(userId);
+        ensureEmployerApproved(userId);
 
         Employer employer = getEmployerOwnedBy(userId);
         return jobRepository.findByEmployer(employer)

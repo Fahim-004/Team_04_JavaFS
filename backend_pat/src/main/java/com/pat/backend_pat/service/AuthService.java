@@ -59,12 +59,21 @@ public class AuthService {
             Employer employer = new Employer();
             employer.setUser(savedUser);
             employer.setApprovedStatus(false);
+            employer.setRejectedStatus(false);
             employerRepository.save(employer);
         }
 
         String token = jwtUtil.generateToken(savedUser.getEmail(), savedUser.getRole().name());
-
-        return new AuthResponse(token, savedUser.getRole().name(), savedUser.getUserId(), "");
+        Boolean approvedStatus = null;
+        Boolean rejectedStatus = null;
+        if (savedUser.getRole() == User.Role.employer) {
+            Employer employer = employerRepository.findByUserUserId(savedUser.getUserId()).orElse(null);
+            if (employer != null) {
+                approvedStatus = employer.getApprovedStatus();
+                rejectedStatus = employer.getRejectedStatus();
+            }
+        }
+        return new AuthResponse(token, savedUser.getRole().name(), savedUser.getUserId(), "", approvedStatus, rejectedStatus);
     }
 
     @Transactional
@@ -81,6 +90,8 @@ public class AuthService {
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
 
         String name = "";
+        Boolean approvedStatus = null;
+        Boolean rejectedStatus = null;
 
         // If user is student → get fullName
         if (user.getRole() == User.Role.student) {
@@ -101,6 +112,8 @@ public class AuthService {
 
             if (employer != null) {
                 name = employer.getCompanyName();
+                approvedStatus = employer.getApprovedStatus();
+                rejectedStatus = employer.getRejectedStatus();
             }
         }
 
@@ -108,7 +121,9 @@ public class AuthService {
                 token,
                 user.getRole().name(),
                 user.getUserId(),
-                name);
+                name,
+                approvedStatus,
+                rejectedStatus);
     }
 
     @Transactional

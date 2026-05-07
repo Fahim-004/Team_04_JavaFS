@@ -28,11 +28,15 @@ const LoginPage = () => {
       const response = await loginUser({ email, password });
       const data = response.data;
 
-      login(data.token, data.role, data.userId);
+      login(data.token, data.role, data.userId, data.approvedStatus, data.rejectedStatus);
       localStorage.setItem("userName", data.name || "User");
 
       if (data.role === "admin") navigate("/admin/dashboard");
-      else if (data.role === "employer") navigate("/employer/dashboard");
+      else if (data.role === "employer") {
+        if (data.rejectedStatus === true) navigate("/employer/rejected");
+        else if (data.approvedStatus === false) navigate("/employer/pending-approval");
+        else navigate("/employer/dashboard");
+      }
       else navigate("/dashboard");
     } catch (error) {
       setError(error.message || handleApiError(error));

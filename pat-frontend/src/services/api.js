@@ -25,6 +25,13 @@ api.interceptors.response.use(
       window.location.href = "/login";
     }
 
+    if (
+      err.response?.status === 403 &&
+      err.response?.data?.message === "Employer account rejected"
+    ) {
+      window.location.href = "/employer/rejected";
+    }
+
     return Promise.reject({
       message: handleApiError(err),
       status: err.response?.status || null,
