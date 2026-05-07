@@ -29,6 +29,10 @@ public class RecruitmentRoundService {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
 
+        if (roundRepository.existsByJobAndRoundOrder(job, roundOrder)) {
+            throw new IllegalArgumentException("Round order already exists for this job");
+        }
+
         RecruitmentRound round = new RecruitmentRound();
         round.setJob(job);
         round.setRoundName(roundName);

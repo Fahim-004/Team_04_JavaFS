@@ -136,7 +136,7 @@ const RoundsManagerPage = () => {
 
       fetchData();
     } catch (error) {
-      showToast("error", getErrorMessage(error, "Failed to add round"));
+      showToast("error", handleApiError(error) || "Failed to add round");
     }
   };
 

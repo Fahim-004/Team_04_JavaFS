@@ -7,10 +7,6 @@ export const handleApiError = (error) => {
     return error;
   }
 
-  if (typeof error === "object" && error.message) {
-    return error.message;
-  }
-
   const responseData = error?.response?.data || error?.raw?.response?.data || error?.data;
 
   if (typeof responseData === "string") {
@@ -25,5 +21,9 @@ export const handleApiError = (error) => {
     return responseData.message;
   }
 
-  return error?.message || "An unexpected error occurred. Please try again.";
+  if (typeof error === "object" && error.message) {
+    return error.message;
+  }
+
+  return "An unexpected error occurred. Please try again.";
 };
