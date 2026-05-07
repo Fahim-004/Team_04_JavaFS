@@ -2,6 +2,7 @@ package com.pat.backend_pat.controller;
 
 import com.pat.backend_pat.dto.StudentAcademicDTO;
 import com.pat.backend_pat.dto.StudentDashboardStatsDTO;
+import com.pat.backend_pat.dto.ResumeUploadResponseDTO;
 import com.pat.backend_pat.dto.StudentProfileDTO;
 import com.pat.backend_pat.entity.Resume;
 import com.pat.backend_pat.entity.Student;
@@ -12,9 +13,11 @@ import com.pat.backend_pat.repository.UserRepository;
 import com.pat.backend_pat.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -69,12 +72,12 @@ public class StudentController {
         return ResponseEntity.ok(academic);
     }
 
-    @PostMapping("/resume")
+    @PostMapping(value = "/resume", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadResume(
-            @RequestParam String filePath) {
+            @RequestParam("file") MultipartFile file) {
         Integer userId = getCurrentUserId();
-        Resume resume = studentService.uploadResume(userId, filePath);
-        return ResponseEntity.status(201).body(resume);
+        ResumeUploadResponseDTO response = studentService.uploadResume(userId, file);
+        return ResponseEntity.status(201).body(response);
     }
 
     @GetMapping("/resumes")

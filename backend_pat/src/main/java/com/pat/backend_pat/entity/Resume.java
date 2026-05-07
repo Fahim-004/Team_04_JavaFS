@@ -28,8 +28,12 @@ public class Resume {
     @Column(name = "resume_file", columnDefinition = "TEXT")
     private String resumeFile;
 
+    // Original file name
+    @Column(name = "file_name")
+    private String fileName;
+
     // Auto-handled by DB (CURRENT_TIMESTAMP)
-    @Column(name = "uploaded_at", insertable = false, updatable = false)
+    @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;
 
     // Boolean field (TINYINT in MySQL)

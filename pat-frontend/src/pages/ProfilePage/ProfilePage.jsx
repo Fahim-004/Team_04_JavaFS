@@ -127,8 +127,9 @@ const handleResumeUpload = async () => {
   }
 
   try {
-    const filePath = `C:\\fakepath\\${resumeFile.name}`;
-    await uploadResume(filePath);
+    const formData = new FormData();
+    formData.append("file", resumeFile);
+    await uploadResume(formData);
     showToast("success", "Resume uploaded successfully!");
     setResumeFile(null);
   } catch (error) {

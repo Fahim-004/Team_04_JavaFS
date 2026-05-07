@@ -47,6 +47,7 @@ const ApplicantsPage = () => {
               <th className="text-left px-4 py-3">CGPA</th>
               <th className="text-left px-4 py-3">Status</th>
               <th className="text-left px-4 py-3">Applied At</th>
+              <th className="text-left px-4 py-3">Resume</th>
             </tr>
           </thead>
 
@@ -55,7 +56,7 @@ const ApplicantsPage = () => {
 
             {applicants.length === 0 ? (
               <tr>
-                <td colSpan="6" className="text-center py-8 text-gray-400">
+                <td colSpan="7" className="text-center py-8 text-gray-400">
                   No applicants yet.
                 </td>
               </tr>
@@ -85,6 +86,30 @@ const ApplicantsPage = () => {
 
                   <td className="px-4 py-3">
                     {new Date(app.appliedAt).toLocaleDateString()}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    {app.resume && app.resume.resumeFile ? (
+                      <button
+                        onClick={() =>
+                          window.open(
+                            `http://localhost:8080${app.resume.resumeFile}`,
+                            "_blank"
+                          )
+                        }
+                        className="px-3 py-1 text-xs font-medium rounded"
+                        style={{
+                          background: "#3b82f6",
+                          color: "#fff",
+                          border: "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        View Resume
+                      </button>
+                    ) : (
+                      <span className="text-gray-400 text-xs">No Resume</span>
+                    )}
                   </td>
 
                 </tr>

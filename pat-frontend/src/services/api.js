@@ -3,7 +3,6 @@ import { handleApiError } from "../utils/handleApiError";
 
 const api = axios.create({
   baseURL: "http://localhost:8080/api/v1",
-  headers: { "Content-Type": "application/json" },
 });
 
 // Attach JWT token automatically to every request
@@ -52,10 +51,9 @@ export const savePersonalDetails = (data) => api.put("/students/profile", data);
 
 export const saveAcademicDetails = (data) => api.put("/students/academic", data);
 // ── Resume Upload ──────────────────────────────────────────────
-export const uploadResume = (filePath) =>
-  api.post("/students/resume", null, {
-    params: { filePath },
-  });
+export const uploadResume = async (formData) => {
+  return await api.post("/students/resume", formData);
+};
 
 // ── Dashboard ─────────────────────────────────────────────────
 export const getDashboardStats = () => api.get("/students/dashboard/stats");

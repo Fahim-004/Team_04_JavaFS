@@ -3,6 +3,7 @@ package com.pat.backend_pat.service;
 import com.pat.backend_pat.dto.StudentAcademicDTO;
 import com.pat.backend_pat.dto.StudentDashboardStatsDTO;
 import com.pat.backend_pat.dto.StudentProfileDTO;
+import com.pat.backend_pat.dto.ResumeUploadResponseDTO;
 import com.pat.backend_pat.entity.Job;
 import com.pat.backend_pat.entity.Resume;
 import com.pat.backend_pat.entity.RoundStatus;
@@ -19,126 +20,186 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class StudentService {
 
-    private final StudentRepository studentRepository;
-    private final ResumeRepository resumeRepository;
-    private final ApplicationRepository applicationRepository;
-    private final JobRepository jobRepository;
-    private final RoundResultRepository roundResultRepository;
+        private final StudentRepository studentRepository;
+        private final ResumeRepository resumeRepository;
+        private final ApplicationRepository applicationRepository;
+        private final JobRepository jobRepository;
+        private final RoundResultRepository roundResultRepository;
 
-    // ✅ 1. Get Profile
-    @Transactional
-    public Student getProfile(Integer userId) {
-        return studentRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
-    }
+        // ✅ 1. Get Profile
+        @Transactional
+        public Student getProfile(Integer userId) {
+                return studentRepository.findByUserUserId(userId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
+        }
 
-    // ✅ 2. Update Profile
-    @Transactional
-    public Student updateProfile(Integer userId, StudentProfileDTO dto) {
-        Student student = studentRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
+        // ✅ 2. Update Profile
+        @Transactional
+        public Student updateProfile(Integer userId, StudentProfileDTO dto) {
+                Student student = studentRepository.findByUserUserId(userId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
 
-        student.setFullName(dto.getFullName());
-        student.setPhoneNumber(dto.getPhoneNumber());
-        student.setUsn(dto.getUsn());
-        student.setBranch(dto.getBranch());
-        student.setCgpa(dto.getCgpa());
-        student.setBacklogCount(dto.getBacklogCount());
-        student.setPassingYear(dto.getPassingYear());
-        student.setSkills(dto.getSkills());
-        student.setProjects(dto.getProjects());
-        student.setLinkedinUrl(dto.getLinkedinUrl());
-        student.setGithubUrl(dto.getGithubUrl());
+                student.setFullName(dto.getFullName());
+                student.setPhoneNumber(dto.getPhoneNumber());
+                student.setUsn(dto.getUsn());
+                student.setBranch(dto.getBranch());
+                student.setCgpa(dto.getCgpa());
+                student.setBacklogCount(dto.getBacklogCount());
+                student.setPassingYear(dto.getPassingYear());
+                student.setSkills(dto.getSkills());
+                student.setProjects(dto.getProjects());
+                student.setLinkedinUrl(dto.getLinkedinUrl());
+                student.setGithubUrl(dto.getGithubUrl());
 
-        student.setProfileCompleted(true);
-        return studentRepository.save(student);
-    }
+                student.setProfileCompleted(true);
+                return studentRepository.save(student);
+        }
 
-    // ✅ 3. Upload Resume
-    @Transactional
-    public Resume uploadResume(Integer userId, String filePath) {
-        Student student = studentRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
+        // ✅ 3. Upload Resume
+        @Transactional
+        public ResumeUploadResponseDTO uploadResume(Integer userId, MultipartFile file) {
+                Student student = studentRepository.findByUserUserId(userId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
 
-        Resume resume = new Resume();
-        resume.setStudent(student);
-        resume.setResumeFile(filePath);
-        resume.setUploadedAt(LocalDateTime.now());
-        resume.setIsDefault(false);
+                // Validate file presence
+                if (file == null || file.isEmpty()) {
+                        throw new IllegalArgumentException("Resume file is required");
+                }
 
-        return resumeRepository.save(resume);
-    }
+                // Validate file size (1MB limit)
+                if (file.getSize() > 1_048_576) {
+                        throw new IllegalArgumentException("Resume file must not exceed 1MB");
+                }
 
-    // ✅ 4. Get All Resumes
-    @Transactional
-    public List<Resume> getResumes(Integer userId) {
-        Student student = studentRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
+                // Validate file extension
+                String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
+                if (originalFileName == null || originalFileName.isBlank()) {
+                        throw new IllegalArgumentException("File name is required");
+                }
+                if (!originalFileName.toLowerCase().endsWith(".pdf")) {
+                        throw new IllegalArgumentException("Only PDF resumes are allowed");
+                }
 
-        return resumeRepository.findByStudentStudentId(student.getStudentId());
-    }
+                // Validate content type
+                String contentType = file.getContentType();
+                if (contentType != null && !contentType.equalsIgnoreCase("application/pdf")) {
+                        throw new IllegalArgumentException("Only PDF resumes are allowed");
+                }
 
-    @Autowired
-    private StudentAcademicRepository studentAcademicRepository;
+                // Create storage directory
+                Path uploadDir = Paths.get("uploads", "resumes").toAbsolutePath().normalize();
+                try {
+                        Files.createDirectories(uploadDir);
+                } catch (IOException ex) {
+                        throw new IllegalStateException("Unable to create resume storage directory", ex);
+                }
 
-    public StudentAcademic updateAcademic(Integer userId, StudentAcademicDTO dto) {
-        Student student = studentRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+                // Store file: uploads/resumes/{userId}.pdf (overwrites existing)
+                Path targetFile = uploadDir.resolve(userId + ".pdf");
+                try (InputStream inputStream = file.getInputStream()) {
+                        Files.copy(inputStream, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException ex) {
+                        throw new IllegalStateException("Failed to store resume file", ex);
+                }
 
-        StudentAcademic academic = studentAcademicRepository
-                .findByStudentStudentId(student.getStudentId())
-                .orElse(new StudentAcademic());
+                String resumeUrl = "/uploads/resumes/" + userId + ".pdf";
 
-        academic.setStudent(student);
-        academic.setDegree(dto.getDegree());
-        academic.setTenth(dto.getTenth());
-        academic.setTwelfth(dto.getTwelfth());
-        academic.setSemester(dto.getSemester());
-        academic.setCertifications(dto.getCertifications());
+                // Update existing resume or create new one (prevents duplicate rows)
+                Optional<Resume> existingResume = resumeRepository
+                                .findTopByStudentStudentIdOrderByUploadedAtDesc(student.getStudentId());
 
-        return studentAcademicRepository.save(academic);
-    }
+                Resume resume = existingResume.orElse(new Resume());
+                resume.setStudent(student);
+                resume.setResumeFile(resumeUrl);
+                resume.setFileName(originalFileName);
+                resume.setUploadedAt(LocalDateTime.now());
+                resume.setIsDefault(false);
 
-    public StudentAcademic getAcademic(Integer userId) {
-        Student student = studentRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+                Resume savedResume = resumeRepository.save(resume);
+                return new ResumeUploadResponseDTO(
+                                resumeUrl,
+                                originalFileName,
+                                savedResume.getUploadedAt());
+        }
 
-        return studentAcademicRepository
-                .findByStudentStudentId(student.getStudentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Academic details not found"));
-    }
+        // ✅ 4. Get All Resumes
+        @Transactional
+        public List<Resume> getResumes(Integer userId) {
+                Student student = studentRepository.findByUserUserId(userId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
 
-    @Transactional
-    public StudentDashboardStatsDTO getDashboardStats(Integer userId) {
-        // Get student; throw if not found (not silent null)
-        Student student = studentRepository.findByUserUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
+                return resumeRepository.findByStudentStudentId(student.getStudentId());
+        }
 
-        // Available drives: count of open jobs (efficient count query)
-        long availableDrives = jobRepository.countByStatus(Job.JobStatus.OPEN);
+        @Autowired
+        private StudentAcademicRepository studentAcademicRepository;
 
-        // My applications: count of this student's applications (efficient count query)
-        long myApplications = applicationRepository.countByStudent(student);
+        public StudentAcademic updateAcademic(Integer userId, StudentAcademicDTO dto) {
+                Student student = studentRepository.findByUserUserId(userId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
-        // Upcoming interviews: count distinct applications where student passed a round
-        // (efficient database query, not stream-based)
-        long upcomingInterviews = roundResultRepository
-                .countDistinctByApplicationStudentAndStatus(
-                        student,
-                        RoundStatus.PASSED);
+                StudentAcademic academic = studentAcademicRepository
+                                .findByStudentStudentId(student.getStudentId())
+                                .orElse(new StudentAcademic());
 
-        return new StudentDashboardStatsDTO(
-                (int) availableDrives,
-                (int) myApplications,
-                (int) upcomingInterviews
-        );
-    }
+                academic.setStudent(student);
+                academic.setDegree(dto.getDegree());
+                academic.setTenth(dto.getTenth());
+                academic.setTwelfth(dto.getTwelfth());
+                academic.setSemester(dto.getSemester());
+                academic.setCertifications(dto.getCertifications());
+
+                return studentAcademicRepository.save(academic);
+        }
+
+        public StudentAcademic getAcademic(Integer userId) {
+                Student student = studentRepository.findByUserUserId(userId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
+                return studentAcademicRepository
+                                .findByStudentStudentId(student.getStudentId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Academic details not found"));
+        }
+
+        @Transactional
+        public StudentDashboardStatsDTO getDashboardStats(Integer userId) {
+                // Get student; throw if not found (not silent null)
+                Student student = studentRepository.findByUserUserId(userId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
+
+                // Available drives: count of open jobs (efficient count query)
+                long availableDrives = jobRepository.countByStatus(Job.JobStatus.OPEN);
+
+                // My applications: count of this student's applications (efficient count query)
+                long myApplications = applicationRepository.countByStudent(student);
+
+                // Upcoming interviews: count distinct applications where student passed a round
+                // (efficient database query, not stream-based)
+                long upcomingInterviews = roundResultRepository
+                                .countDistinctByApplicationStudentAndStatus(
+                                                student,
+                                                RoundStatus.PASSED);
+
+                return new StudentDashboardStatsDTO(
+                                (int) availableDrives,
+                                (int) myApplications,
+                                (int) upcomingInterviews);
+        }
 }
