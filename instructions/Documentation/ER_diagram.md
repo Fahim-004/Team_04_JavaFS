@@ -1,8 +1,8 @@
 # Placement Automation Tool (PAT)
 
-## Entity Relationship Diagram (ERD)
+## Updated Entity Relationship Diagram (ERD)
 
-This ER diagram represents the core data relationships for the Placement Automation Tool.
+This ER diagram represents the updated database structure and relationships for the Placement Automation Tool.
 
 ---
 
@@ -15,6 +15,8 @@ erDiagram
         string password_hash
         enum role
         datetime created_at
+        string reset_token
+        datetime reset_token_expiry
     }
 
     STUDENTS {
@@ -32,6 +34,16 @@ erDiagram
         string linkedin_url
         string github_url
         boolean profile_completed
+    }
+
+    STUDENT_ACADEMIC {
+        int academic_id PK
+        int student_id FK
+        string degree
+        double tenth
+        double twelfth
+        int semester
+        text certifications
     }
 
     EMPLOYERS {
@@ -57,12 +69,13 @@ erDiagram
         date application_deadline
         date placement_drive_date
         datetime created_at
+        enum status
     }
 
     RESUMES {
         int resume_id PK
         int student_id FK
-        string resume_file
+        text resume_file
         datetime uploaded_at
         boolean is_default
     }
@@ -72,7 +85,7 @@ erDiagram
         int student_id FK
         int job_id FK
         int resume_id FK
-        string status
+        enum status
         datetime applied_at
     }
 
@@ -110,6 +123,8 @@ erDiagram
     USERS ||--|| STUDENTS : "has"
     USERS ||--|| EMPLOYERS : "has"
 
+    STUDENTS ||--|| STUDENT_ACADEMIC : "has"
+
     EMPLOYERS ||--o{ JOBS : "posts"
 
     STUDENTS ||--o{ RESUMES : "uploads"
@@ -119,21 +134,10 @@ erDiagram
 
     JOBS ||--o{ RECRUITMENT_ROUNDS : "has"
 
-    APPLICATIONS ||--o{ ROUND_RESULTS : "has"
+    APPLICATIONS ||--o{ ROUND_RESULTS : "contains"
 
     RECRUITMENT_ROUNDS ||--o{ ROUND_RESULTS : "records"
 
     USERS ||--o{ NOTIFICATIONS : "receives"
 
     STUDENTS ||--|| STUDENT_ANALYTICS : "has"
-```
-
----
-
-# Important Note
-
-* This ER diagram represents **structure and relationships only**
-* Field constraints such as `NOT NULL` and validation rules are defined in:
-
-  * Database schema document
-  * SRS document
