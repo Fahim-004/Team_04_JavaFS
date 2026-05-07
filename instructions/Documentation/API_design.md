@@ -5,22 +5,19 @@
 This document defines the REST API endpoints for the Placement Automation Tool (PAT).
 
 Base URL:
-
-```
 /api/v1
-```
+All endpoints except `/auth/register`, `/auth/login`, `/auth/forgot-password`, and `/auth/reset-password` require a valid JWT in the Authorization header:
 
+Authorization: Bearer <token>
 ---
 
 # 1. Authentication APIs
 
 ## Register User
-
-```
 POST /auth/register
-```
+**Access:** Public
 
-### Request Body
+**Request Body:**
 
 ```json
 {
@@ -33,12 +30,10 @@ POST /auth/register
 ---
 
 ## Login
-
-```
 POST /auth/login
-```
+**Access:** Public
 
-### Request
+**Request Body:**
 
 ```json
 {
@@ -47,83 +42,161 @@ POST /auth/login
 }
 ```
 
-### Response
+**Response:**
 
 ```json
 {
-  "token": "jwt_token",
+  "token": "jwt_access_token",
   "role": "student"
 }
 ```
+
+**Notes:**
+- Returns a single access token valid for 24 hours.
+- No refresh token is issued. After expiry, the user must log in again.
+
+---
+
+## Forgot Password
+POST /auth/forgot-password
+**Access:** Public
+
+**Request Body:**
+
+```json
+{
+  "email": "user@email.com"
+}
+```
+
+**Behavior:**
+- Generates a `reset_token` and sets `reset_token_expiry` on the user record.
+- Sends a password reset link to the provided email via SMTP.
+
+---
+
+## Reset Password
+POST /auth/reset-password
+**Access:** Public
+
+**Request Body:**
+
+```json
+{
+  "token": "reset_token_value",
+  "newPassword": "newsecurepassword"
+}
+```
+
+**Behavior:**
+- Validates the token and expiry.
+- Updates the password hash.
+- Clears `reset_token` and `reset_token_expiry`.
 
 ---
 
 # 2. Student APIs
 
 ## Get Student Profile
+GET /students/profile 
 
-```
-GET /students/profile
-```
+**Access:** Student
 
 ---
 
 ## Update Student Profile
-
-```
 PUT /students/profile
-```
+
+**Access:** Student
 
 ---
 
 ## Upload Resume
-
-```
 POST /students/resume
+**Access:** Student
+
+**Request:** `multipart/form-data`
+
+| Parameter | Type | Description          |
+|-----------|------|----------------------|
+| file      | File | PDF file, max 1MB    |
+
+**Validation:**
+- PDF format only
+- Max file size: 1MB
+- Filename is sanitized before storage
+
+**Behavior:**
+- Stores the file at `uploads/resumes/{userId}.pdf`
+- Overwrites existing resume if one exists
+- Saves path and metadata to the `resumes` table
+
+**Response:**
+
+```json
+{
+  "resumeUrl": "/uploads/resumes/5.pdf",
+  "fileName": "resume.pdf",
+  "uploadedAt": "2026-01-15T10:30:00"
+}
 ```
 
 ---
 
 ## Get All Resumes
-
-```
 GET /students/resumes
-```
+
+**Access:** Student
+
+---
+
+## Get Student Analytics
+GET /students/analytics
+
+**Access:** Student
+
+---
+
+## Get Student Applications
+GET /students/applications
+
+**Access:** Student
 
 ---
 
 # 3. Job APIs
 
-## Get All Jobs
-
-```
+## Get All Jobs (Student View)
 GET /jobs
-```
 
-### Query Parameters
+**Access:** Student
 
-```
-?branch=CSE
-?min_cgpa=7
-```
+**Query Parameters:**
+
+| Parameter | Type   | Description            |
+|-----------|--------|------------------------|
+| branch    | String | Filter by branch       |
+| min_cgpa  | Double | Filter by minimum CGPA |
+
+**Notes:**
+- Returns only `OPEN` status jobs.
 
 ---
 
 ## Get Job Details
-
-```
 GET /jobs/{job_id}
-```
+
+**Access:** Student, Employer
 
 ---
 
 ## Apply for Job
 
-```
 POST /jobs/{job_id}/apply
-```
 
-### Request
+**Access:** Student
+
+**Request Body:**
 
 ```json
 {
@@ -131,13 +204,28 @@ POST /jobs/{job_id}/apply
 }
 ```
 
+**Behavior:**
+- Checks job status is `OPEN`
+- Validates student eligibility (CGPA, branch, backlogs, passing year)
+- Prevents duplicate applications
+- Falls back to default resume if no `resume_id` is provided
+- Creates application with status `Applied`
+- Creates a notification for the student
+
 ---
 
-## Get Applied Jobs
+## Get Applicants for Job
+GET /jobs/{job_id}/applicants
 
-```
-GET /students/applications
-```
+**Access:** Employer
+
+**Query Filters:**
+
+| Parameter | Type   | Description        |
+|-----------|--------|--------------------|
+| cgpa      | Double | Filter by CGPA     |
+| branch    | String | Filter by branch   |
+| skills    | String | Filter by skill    |
 
 ---
 
@@ -145,11 +233,11 @@ GET /students/applications
 
 ## Register Employer Profile
 
-```
 POST /employers/profile
-```
 
-### Request
+**Access:** Employer (unapproved)
+
+**Request Body:**
 
 ```json
 {
@@ -161,12 +249,9 @@ POST /employers/profile
 ---
 
 ## Post Job
+**Access:** Employer (approved only)
 
-```
-POST /jobs
-```
-
-### Request (Validated)
+**Request Body:**
 
 ```json
 {
@@ -174,7 +259,6 @@ POST /jobs
   "salary_package": "18 LPA",
   "application_deadline": "2026-10-20",
   "placement_drive_date": "2026-10-25",
-
   "job_description": "Backend development",
   "job_location": "Bangalore",
   "min_cgpa": 7.0,
@@ -184,80 +268,76 @@ POST /jobs
 }
 ```
 
-### Required Fields
+**Required Fields:** `job_title`, `salary_package`, `application_deadline`, `placement_drive_date`
 
-* job_title
-* salary_package
-* application_deadline
-* placement_drive_date
+**Optional Fields:** `job_description`, `job_location`, `min_cgpa`, `eligible_branches`, `max_backlogs`, `passing_year`
 
-### Optional Fields
+**Validation Rules:**
+- `job_title` and `salary_package` must not be empty
+- `application_deadline` must be a future date
+- `placement_drive_date` ≥ `application_deadline`
+- `min_cgpa` (if provided): 0–10
+- `max_backlogs` (if provided): ≥ 0
 
-* job_description
-* job_location
-* min_cgpa
-* eligible_branches
-* max_backlogs
-* passing_year
-
-### Validation Rules
-
-* job_title must not be empty
-* salary_package must not be empty
-* application_deadline must be a valid future date
-* placement_drive_date must be ≥ application_deadline
-* min_cgpa (if provided) must be between 0–10
-* max_backlogs (if provided) must be ≥ 0
+**Behavior:**
+- Job is created with `status = OPEN`
 
 ---
 
-## Get Employer Jobs
+## Edit Job
+PUT /jobs/{job_id}
 
+**Access:** Employer (owner only)
+
+---
+
+## Update Job Status
+
+PUT /jobs/{job_id}/status
+
+**Access:** Employer (owner only)
+
+**Request Body:**
+
+```json
+{
+  "status": "CLOSED"
+}
 ```
+
+**Valid Values:** `OPEN`, `CLOSED`, `DELETED`
+
+**Effects:**
+- `CLOSED`: No new applications accepted
+- `DELETED`: Job removed from student-facing listings
+
+---
+
+## Get Employer's Jobs
 GET /employers/jobs
-```
-
----
-
-## Get Applicants for Job
-
-```
-GET /jobs/{job_id}/applicants
-```
-
-### Query Filters
-
-```
-?cgpa=7
-?branch=CSE
-?skills=React
-```
+**Access:** Employer
 
 ---
 
 # 5. Recruitment Round APIs
 
 ## Create Recruitment Round
-
-```
 POST /jobs/{job_id}/rounds
-```
+
+**Access:** Employer
 
 ---
 
 ## Get Job Rounds
-
-```
 GET /jobs/{job_id}/rounds
-```
+
+**Access:** Employer, Student
 
 ---
 
 ## Update Round Result
-
-```
 PUT /applications/{application_id}/round-result
-```
+**Access:** Employer
 
 ---
 
@@ -265,17 +345,15 @@ PUT /applications/{application_id}/round-result
 
 ## Update Application Status
 
-```
 PUT /applications/{application_id}/status
-```
 
----
+**Access:** Employer
 
-## Get Application Status
+**Valid Status Transitions:**
+Applied → Shortlisted → Round1_Cleared → Round2_Cleared → Selected
+Applied → Rejected (any point)
 
-```
-GET /applications/{application_id}
-```
+**Access:** Student (own), Employer (applicants for their jobs)
 
 ---
 
@@ -283,17 +361,20 @@ GET /applications/{application_id}
 
 ## Get Notifications
 
-```
 GET /notifications
-```
+
+**Access:** Authenticated users (any role)
+
+**Notes:**
+- Fetched on-demand when the user opens the notification panel.
+- No real-time push mechanism.
 
 ---
 
-## Mark Notification Read
-
-```
+## Mark Notification as Read
 PUT /notifications/{notification_id}/read
-```
+
+**Access:** Authenticated users (own notifications only)
 
 ---
 
@@ -301,67 +382,68 @@ PUT /notifications/{notification_id}/read
 
 ## Get All Students
 
-```
 GET /admin/students
-```
+
+**Access:** Admin
 
 ---
 
 ## Get All Employers
-
-```
 GET /admin/employers
-```
+
+**Access:** Admin
 
 ---
 
 ## Approve Employer
 
-```
 PUT /admin/employers/{employer_id}/approve
-```
+
+**Access:** Admin
 
 ---
 
-## Remove Employer
+## Reject / Remove Employer
 
-```
 DELETE /admin/employers/{employer_id}
-```
+
+**Access:** Admin
 
 ---
 
-## Placement Statistics
-
-```
+## Get Placement Statistics
 GET /admin/statistics
-```
+**Access:** Admin
 
 ---
 
-# 9. Analytics APIs
+## Manage Jobs (Admin)
+GET /admin/jobs
+DELETE /admin/jobs/{job_id}
 
-## Student Analytics
-
-```
-GET /students/analytics
-```
+**Access:** Admin
 
 ---
 
-# 10. Security & Validation Rules
+# 9. Security and Validation Summary
 
-* All APIs require JWT authentication
-* Role-based access control enforced
-* Input validation must be handled at backend layer
-* Never rely only on database constraints for validation
+| Rule                              | Detail                                                     |
+|-----------------------------------|------------------------------------------------------------|
+| Authentication                    | JWT access token, 24-hour expiry, no refresh tokens        |
+| Authorization                     | Role-based, enforced at controller level                   |
+| Input validation                  | API-level validation before any DB operation               |
+| Resume validation                 | PDF only, max 1MB, sanitized filename                      |
+| Job status filtering              | Only OPEN jobs visible to students                         |
+| Duplicate application prevention  | Enforced at service layer                                  |
+| Employer approval gate            | Unapproved employers cannot post jobs                      |
 
 ---
 
 # API Roles Summary
 
-| Role     | Access                               |
-| -------- | ------------------------------------ |
-| Student  | Profile, Resume, Jobs, Applications  |
-| Employer | Jobs, Applicants, Recruitment Rounds |
-| Admin    | Employer approval, System monitoring |
+| Role     | Access                                                        |
+|----------|---------------------------------------------------------------|
+| Student  | Profile, academic details, resume, jobs, applications, notifications, analytics |
+| Employer | Job management (post/edit/status), applicants, recruitment rounds, notifications |
+| Admin    | Employer approval, job management, student monitoring, statistics               |
+
