@@ -2,272 +2,210 @@
 
 ## Technology Stack
 
-This document defines the technology stack used to develop the Placement Automation Tool (PAT). The system follows a modern web application architecture using a React frontend, Spring Boot backend, and MySQL database.
+This document defines the technology stack used to build the Placement Automation Tool (PAT).
 
 ---
 
 # 1. System Architecture Overview
 
-PAT follows a **3-tier architecture**:
-
-```
+PAT follows a **3-tier architecture** with additional system components:
 Client (Browser)
-      │
-      ▼
+│
+▼
 Frontend (React.js)
-      │
-      ▼
-Backend API (Spring Boot)
-      │
-      ▼
+│  REST API over HTTP (Axios)
+▼
+Backend (Spring Boot)
+│
+├── JWT Security Layer
+├── Resume Upload Handler → Server Filesystem (uploads/resumes/)
+├── Password Reset Service → SMTP (Spring Mail)
+└── Notification Service (REST-based)
+│
+▼
 Database (MySQL)
-```
 
 ---
 
-# 2. Frontend Technology Stack
+# 2. Frontend
 
-The frontend is responsible for rendering the user interface and interacting with backend APIs.
+The frontend renders the user interface and communicates with the backend via REST APIs.
 
-### Core Technologies
+| Technology  | Purpose                                |
+|-------------|----------------------------------------|
+| React.js    | UI component framework                 |
+| Vite        | Build tool and dev server              |
+| TailwindCSS | Utility-first CSS styling              |
+| Axios       | HTTP client for REST API communication |
+| HTML5       | Page structure                         |
+| CSS3        | Supplemental styling                   |
+| JavaScript  | Application logic                      |
 
-| Technology | Purpose                            |
-| ---------- | ---------------------------------- |
-| React.js   | Frontend framework for building UI |
-| HTML5      | Structure of the web pages         |
-| CSS3       | Styling and layout                 |
-| JavaScript | Application logic                  |
-
-### Responsibilities
-
-The frontend handles:
-
-* User authentication interface
-* Student dashboard
-* Employer dashboard
-* Admin dashboard
-* Job listings
-* Application workflow
-* Notification display
-* Analytics display
-
-### Communication with Backend
-
-The frontend communicates with backend services using:
-
-```
-REST APIs over HTTP
-```
+**Responsibilities:**
+- Authentication interface (login, register, forgot/reset password)
+- Student, Employer, and Admin dashboards
+- Job browsing and application workflow
+- Resume upload interface
+- Notification display
+- Analytics dashboard
 
 ---
 
-# 3. Backend Technology Stack
+# 3. Backend
 
-The backend is responsible for handling business logic, authentication, data processing, and API services.
+The backend handles all business logic, authentication, file handling, and data access.
 
-### Core Technologies
+| Technology          | Purpose                              |
+|---------------------|--------------------------------------|
+| Java                | Programming language                 |
+| Spring Boot         | Application framework                |
+| Spring Web          | REST API development                 |
+| Spring Security     | Authentication and authorization     |
+| JWT (HS256)         | Stateless API authentication         |
+| Spring Data JPA     | Data access abstraction              |
+| Hibernate           | ORM (Object Relational Mapping)      |
+| Lombok              | Boilerplate reduction                |
+| Jakarta Validation  | Annotation-based input validation    |
+| Spring Mail         | SMTP email for password reset        |
+| Multipart File API  | Resume PDF upload and storage        |
 
-| Technology            | Purpose                            |
-| --------------------- | ---------------------------------- |
-| Java                  | Programming language               |
-| Spring Boot           | Backend application framework      |
-| Spring Web            | REST API development               |
-| Spring Security       | Authentication and authorization   |
-| JWT (JSON Web Tokens) | Secure API authentication          |
-| Spring Data JPA       | Data access abstraction            |
-| Hibernate             | ORM (Object Relational Mapping)    |
-| Jakarta Validation    | Input validation using annotations |
-
----
-
-### Backend Responsibilities
-
-The backend manages:
-
-* User authentication
-* Role-based access control
-* Input validation (API-level validation before DB operations)
-* Student profile management
-* Employer job postings
-* Job eligibility filtering
-* Job applications
-* Recruitment round management
-* Application status tracking
-* Notifications
-* Analytics
+**Responsibilities:**
+- User authentication and JWT issuance
+- Role-based access control (Student, Employer, Admin)
+- Student profile and academic data management
+- Employer registration and approval workflow
+- Job posting lifecycle (OPEN → CLOSED → DELETED)
+- Eligibility validation and application processing
+- Recruitment round and round result management
+- Resume upload, validation, and filesystem storage
+- Password reset via SMTP email
+- Notification creation and retrieval
+- Analytics data management
 
 ---
 
-# 4. Database
+# 4. Authentication and Security
 
-### Database System
-
-| Technology | Purpose                               |
-| ---------- | ------------------------------------- |
-| MySQL      | Relational database management system |
-
-### Database Responsibilities
-
-The database stores:
-
-* User accounts
-* Student profiles
-* Employer profiles
-* Job postings
-* Applications
-* Recruitment rounds
-* Resume files
-* Notifications
-* Analytics data
-
-### Data Access Layer
-
-Database operations are handled using:
-
-```
-Spring Data JPA
-Hibernate ORM
-```
+| Mechanism       | Detail                                                        |
+|-----------------|---------------------------------------------------------------|
+| Authentication  | Spring Security + JWT                                         |
+| Token type      | Access token only (no refresh tokens)                         |
+| Token expiry    | 24 hours; user must log in again after expiry                 |
+| Signing         | HS256                                                         |
+| Authorization   | Role-based, enforced at controller level                      |
+| Passwords       | Stored as hashed values                                       |
 
 ---
 
-# 5. Authentication & Security
+# 5. File Storage
 
-Authentication and authorization are implemented using **Spring Security with JWT**.
-
-### Authentication Flow
-
-```
-User Login
-    │
-    ▼
-Backend validates credentials
-    │
-    ▼
-JWT token generated
-    │
-    ▼
-Frontend stores token
-    │
-    ▼
-Token sent with every API request
-```
-
-### Security Features
-
-* JWT based authentication
-* Role based access control
-* Secure password hashing
-* Protected API endpoints
+| Aspect          | Detail                                           |
+|-----------------|--------------------------------------------------|
+| Upload method   | Multipart form-data (Spring MultipartFile)        |
+| Storage         | Server local filesystem                          |
+| Path pattern    | `uploads/resumes/{userId}.pdf`                   |
+| DB storage      | Path/URL only — no binary stored in DB           |
+| Validation      | PDF only, max 1MB, sanitized filename            |
+| Overwrite       | New upload replaces existing file for same user  |
 
 ---
 
-# 6. API Testing
+# 6. Email Service
 
-### Tool Used
+| Aspect   | Detail                                  |
+|----------|-----------------------------------------|
+| Library  | Spring Mail (Java MailSender)           |
+| Protocol | SMTP                                    |
+| Usage    | Password reset only                     |
 
-| Tool    | Purpose                   |
-| ------- | ------------------------- |
-| Postman | API testing and debugging |
-
----
-
-# 7. Build & Dependency Management
-
-### Build Tool
-
-| Tool  | Purpose                                    |
-| ----- | ------------------------------------------ |
-| Maven | Dependency management and build automation |
-
-Main configuration file:
-
-```
-pom.xml
-```
+General notification emails are **not** implemented. Application and status notifications are stored in the database and fetched via REST API.
 
 ---
 
-# 8. Configuration Management
+# 7. Notification System
+
+| Aspect        | Detail                                          |
+|---------------|-------------------------------------------------|
+| Mechanism     | REST API polling (on-demand fetch)              |
+| Real-time     | No WebSocket, no SSE                            |
+| Triggers      | Job creation, status updates, round results     |
+| Tracking      | Per-user, read/unread state stored in DB        |
+
+---
+
+# 8. Database
+
+| Technology | Purpose                                |
+|------------|----------------------------------------|
+| MySQL      | Relational database management system  |
+
+**Data access:** Spring Data JPA + Hibernate ORM
+
+**Tables:** users, students, student_academic, employers, jobs, resumes, applications, recruitment_rounds, round_results, notifications, student_analytics
+
+---
+
+# 9. Build and Dependency Management
+
+| Tool  | Purpose                              |
+|-------|--------------------------------------|
+| Maven | Dependency management and build tool |
+
+Main configuration file: `pom.xml`
+
+---
+
+# 10. Configuration
 
 Application configuration is stored in:
-
-```
 application.properties
-```
+
+Key configuration areas: database connection, JWT secret and expiry, SMTP settings, file upload path.
 
 ---
 
-# 9. Version Control
+# 11. API Testing
 
-| Tool   | Purpose                     |
-| ------ | --------------------------- |
-| Git    | Source code version control |
-| GitHub | Remote repository hosting   |
+| Tool    | Purpose                    |
+|---------|----------------------------|
+| Postman | API testing and debugging  |
 
 ---
 
-# 10. Project Repository Structure
+# 12. Version Control
 
-```
-PAT
+| Tool   | Purpose                      |
+|--------|------------------------------|
+| Git    | Source code version control  |
+| GitHub | Remote repository hosting    |
+
+---
+
+# 13. Project Repository Structure
+
+PAT/
 │
-├── backend
-├── frontend
-├── docs
-│   ├── srs.md
-│   ├── api_design.md
-│   ├── database_schema.md
-│   ├── er_diagram.md
-│   └── tech_stack.md
+├── backend/
+├── frontend/
+├── docs/
+│   ├── ER_diagram.md
+│   ├── Database_schema.md
+│   ├── System_architecture.md
+│   ├── Sequence_diagrams.md
+│   ├── use_case_diagram.md
+│   ├── API_design.md
+│   ├── System_requirements.md
+│   └── Techstack.md
 │
 └── README.md
-```
 
 ---
 
-# 11. Future Technology Improvements
+# 14. Future Technology Improvements
 
-* Docker containerization
-* Cloud deployment (AWS / Azure)
-* Cloud storage for resumes
-* Email notification services
-* CI/CD pipelines
-* Multi-college architecture
-
----
-
-# Final Technology Stack Summary
-
-```
-Frontend
-React.js
-HTML
-CSS
-JavaScript
-
-Backend
-Java
-Spring Boot
-Spring Web
-Spring Security
-JWT Authentication
-Spring Data JPA
-Hibernate
-Jakarta Validation
-
-Database
-MySQL
-
-API Testing
-Postman
-
-Build Tool
-Maven
-
-Configuration
-application.properties
-
-Version Control
-Git + GitHub
-```
+- Docker containerization
+- Cloud deployment (AWS / Azure)
+- Cloud storage for resume files (S3 or equivalent)
+- General email notification system
+- CI/CD pipelines
+- Multi-college architecture support
