@@ -74,6 +74,7 @@ CREATE TABLE employers (
     company_name VARCHAR(255) DEFAULT NULL,
     company_description TEXT,
     approved_status BOOLEAN NOT NULL DEFAULT FALSE,
+    rejected_status BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (employer_id),
